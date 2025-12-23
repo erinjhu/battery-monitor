@@ -5,11 +5,11 @@ Real-time battery monitor made with STM32 and FreeRTOS
 
 ## Test GPIO and ADC
 
-- [ ] GPIO
-	- [ ] Assemble basic LED circuit
-	- [ ] Code the LED to blink
+- [x] GPIO
+	- [x] Assemble basic LED circuit
+	- [x] Code the LED to blink
 - [ ] ADC
-	- [ ] Connect potentiometer, ADC, and voltage divider
+	- [ ] Connect potentiometerx ADC, and voltage divider
 	- [ ] Code 
 		- [ ] Initialize ADC registers
 		- [ ] Polling function
