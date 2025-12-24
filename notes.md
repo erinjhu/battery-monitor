@@ -1,3 +1,26 @@
+## GPIO
+
+### Blinking LED
+
+Turn LED ON/OFF
+
+```C
+/* USER CODE BEGIN 3 */
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, 1); // PB5
+HAL_Delay(1000); // 1000 ms
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, 0); // PB5
+HAL_Delay(1000); // 1000 ms
+```
+
+Toggle pin
+
+```C
+/* USER CODE BEGIN 3 */
+HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
+HAL_Delay(1000); // 1000 ms
+```
+
+
 ## PWM
 
 ### PWM Frequency
@@ -24,3 +47,68 @@ $\text{Compare Register Value}=\frac{\text{Duty Cycle} }{100} \cdot \text{Period
 | $\text{Compare Register Value}$ | when the counter reaches the compare register value, switch the signal from ON to OFF |
 | $\text{Duty Cycle}$             | % of the period that the signal is ON                                                 |
 | $\text{Period}$                 | number of ticks in one full cycle                                                     |
+
+
+### Change LED Brightness
+
+* After each iteration of the first for loop:
+	* $\uparrow$ compare value $\rightarrow$ $\uparrow$ duty cycle $\rightarrow$ $\uparrow$ fraction of the period where LED is ON, making it appear brighter
+* After each iteration of the second for loop:
+	* $\downarrow$ compare value $\rightarrow$ $\downarrow$ duty cycle $\rightarrow$ $\downarrow$ fraction of the period where LED is ON, making it appear dimmer
+
+```C
+/* USER CODE BEGIN 2 */
+HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+/* USER CODE END 2 */
+/* Infinite loop */
+/* USER CODE BEGIN WHILE */
+while (1) {
+/* USER CODE END WHILE */
+/* USER CODE BEGIN 3 */
+	for(int i = 0; i < 210; i++) {
+		__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, i);
+		HAL_Delay(2);
+	}
+	for(int i = 210; i > 0; i--) {
+		__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, i);
+		HAL_Delay(2);
+	}
+}
+/* USER CODE END 3 */
+```
+## ADC
+
+### Potentiometer
+
+- Acts as a resistor if the outer two terminals are connected
+- Middle terminal is a wiper
+
+### Simple Potentiometer Circuit
+
+* Connect the potentiometer to 3.3V, GND, and the ADC pin
+* The code below prints `readVal` which is a number between 0 (ground) to 4095 (reference voltage, which is 3.3V)
+
+```C
+while (1){
+/* USER CODE END WHILE */
+/* USER CODE BEGIN 3 */
+	printf("test print\r\n");
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	readVal = HAL_ADC_GetValue(&hadc1);
+	sprintf(tx_buffer, "%hu\r\n", readVal);
+	HAL_UART_Transmit(&huart2, (uint8_t*)tx_buffer, strlen(tx_buffer), HAL_MAX_DELAY);
+	HAL_Delay(10);
+}
+/* USER CODE END 3 */
+```
+
+$V=\frac{\text{readVal}}{2^n-1} \cdot V_{\text{ref}}$
+
+| Variable         | Description                                      |
+| ---------------- | ------------------------------------------------ |
+| $n$              | ADC resolution; the STM32 board has a 12-bit ADC |
+| $V_{\text{ref}}$ | reference voltage (3.3V)                         |
+
+
+
