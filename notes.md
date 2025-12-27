@@ -130,5 +130,32 @@ __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwmVal);
 }
 ```
 
+## UART
+
+- Asynchronous - doesn't need clock
+- Duplex communication - can send and receive data simultaneously
+
+### Data
+
+Made of...
+- Start bit
+- Data bits
+- Parity bit
+- Stop bit
+
+Baud rate:
+- Number of bits transmitted per second
+- Both sender and receiver must have the same baud rate
+
+Settings used
+
+| Parameter   | Value                     |
+| ----------- | ------------------------- |
+| Baud Rate   | 115200 Bits/s             |
+| Word Length | 8 Bits (including Parity) |
+| Stop Bits   | 1                         |
+
+When the microcontroller receives data from the computer, it will trigger an interrupt
+
 
 
