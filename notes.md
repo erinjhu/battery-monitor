@@ -111,4 +111,24 @@ $V=\frac{\text{readVal}}{2^n-1} \cdot V_{\text{ref}}$
 | $V_{\text{ref}}$ | reference voltage (3.3V)                         |
 
 
+To use the potentiometer to change the LED brightness
+
+```C
+/* USER CODE BEGIN 3 */
+
+printf("test print\r\n");
+HAL_ADC_Start(&hadc1);
+HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+readVal = HAL_ADC_GetValue(&hadc1);
+sprintf(tx_buffer, "%hu\r\n", readVal);
+HAL_UART_Transmit(&huart2, (uint8_t*)tx_buffer, strlen(tx_buffer), HAL_MAX_DELAY);
+HAL_Delay(10);
+uint32_t pwmVal = (readVal * 209) / 4095;
+// 4095 is the max val
+// 209 is the counter period
+__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwmVal);
+}
+```
+
+
 
