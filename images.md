@@ -1,3 +1,12 @@
+
+### Jan 23, 2026
+
+- Updated documentation for ADC, interrupts, and polling
+
+Next session
+- Set up circuit to use ADC polling to turn on LED
+  - Use if statements to check ADC value and write output pins accordingly
+
 ### Dec 26, 2025
 
 - Control LED brightness with potentiometer, PWM, and ADC

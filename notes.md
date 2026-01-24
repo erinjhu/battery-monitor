@@ -115,7 +115,8 @@ $V=\frac{\text{readVal}}{2^n-1} \cdot V_{\text{ref}}$
 | ---------------- | ------------------------------------------------ |
 | $n$              | ADC resolution; the STM32 board has a 12-bit ADC |
 | $V_{\text{ref}}$ | reference voltage (3.3V)                         |
-
+| $\text{readVal}$ | raw value read from ADC					      |
+| $\frac{\text{readVal}}{2^n-1}$ | normalized value (from 0 to 1)|
 
 To use the potentiometer to change the LED brightness
 
@@ -135,6 +136,22 @@ uint32_t pwmVal = (readVal * 209) / 4095;
 __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwmVal);
 }
 ```
+### ADC Polling
+
+* Code repeatedly checks a peripheral for an event or data
+* For ADC polling, the code waits for the ADC conversion to finish and then reads the value
+
+Put this in the main infinite while loop and replace the parameters.
+
+```c
+HAL_ADC_Start(ADC_HandleTypeDef *hadc);
+HAL_ADC_PollForConversion*ADC_HandleTypeDef *hadc, uint32_t Timeout);
+// timeout is how long the function should wait for the ADC conversion to complete
+// if the conversion doesn't finish within the timeout, the function will return with a timeout error
+// can use HAL_MAX_DELAY
+HAL_ADC_GetValue(ADC_HandleTypeDef *hadc)
+```
+
 
 ## UART
 

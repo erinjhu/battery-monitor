@@ -9,7 +9,7 @@ Real-time battery monitor made with STM32 and FreeRTOS
 	- [x] Assemble basic LED circuit
 	- [x] Code the LED to blink
 - [ ] ADC
-	- [ ] Connect potentiometer ADC, and voltage divider
+	- [x] Connect potentiometer ADC, and voltage divider
 	- [ ] Code 
 		- [ ] Initialize ADC registers
 		- [ ] Polling function
