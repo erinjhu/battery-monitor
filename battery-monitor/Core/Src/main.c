@@ -112,9 +112,9 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     // IT - interrupt
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, 1);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
+    // HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, 1);
+    // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+    // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
 	  HAL_UART_Receive_IT(&huart2, rx_data, sizeof(rx_data));
     
   }

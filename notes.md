@@ -1,3 +1,9 @@
+## Intro
+
+This file documents concepts I've been learning.
+
+Most of it is from [CircuitGator HQ's STM32 Beginner's Guide](https://youtube.com/playlist?list=PLGh4659DkyarOFZVtnah4KORCJzuPbWg_&si=7iypIOyyFD7IGzBB).
+
 ## GPIO
 
 ### Blinking LED
@@ -157,5 +163,46 @@ Settings used
 
 When the microcontroller receives data from the computer, it will trigger an interrupt
 
+### Key Press Interrupt to Change LED Colour
 
+**Private variables section (top of `main.c`)**
+
+1. Initialize the starting message to send on UART.
+```c
+char tx_data[] = "Select colour: R, G, or B: \r\n";
+char rx_data[1];
+```
+
+2. Transmit the data across UART.
+
+```c
+HAL_UART_Transmit(&huart2, tx_data, sizeof(tx_data), HAL_MAX_DELAY);
+```
+
+**Infinite loop**
+
+Receive the data from UART. This function configures the hardware to wait for incoming data from a key press. 
+
+When you press a key, the hardware triggers an interrupt, and the HAL library will call the callback function.
+
+```c
+HAL_UART_Receive_IT(&huart2, rx_data, sizeof(rx_data));
+```
+
+**Callback function**
+
+Pressing a character triggers an interrupt, and the callback function is called. 
+
+```c
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(!strcmp(rx_data, "R")) {
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, 1);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
+		char msg[] = "Red selected\r\n";
+		HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+	}
+}
+```
 
