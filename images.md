@@ -1,17 +1,19 @@
+### Jan 24, 2026
+
+- Set up circuit to use ADC polling to choose an LED depending on potentiometer value
+
+![LED and potentiometer - polling](adc_polling_led_potentiometer1.png)
+![LED and potentiometer - polling](adc_polling_led_potentiometer2.png)
 
 ### Jan 23, 2026
 
 - Updated documentation for ADC, interrupts, and polling
 
-Next session
-- Set up circuit to use ADC polling to turn on LED
-  - Use if statements to check ADC value and write output pins accordingly
-
 ### Dec 26, 2025
 
 - Control LED brightness with potentiometer, PWM, and ADC
 
-![LED and potentiometer](images/potentiometerled.png)
+![LED and potentiometer - PWM](images/potentiometerled.png)
 
 ### Dec 23, 2025
 

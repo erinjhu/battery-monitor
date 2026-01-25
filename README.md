@@ -8,14 +8,13 @@ Real-time battery monitor made with STM32 and FreeRTOS
 - [x] GPIO
 	- [x] Assemble basic LED circuit
 	- [x] Code the LED to blink
-- [ ] ADC
-	- [x] Connect potentiometer ADC, and voltage divider
-	- [ ] Code 
-		- [ ] Initialize ADC registers
-		- [ ] Polling function
-			- [ ] Convert raw value to voltage
-			- [ ] Turn on green LED if V > 2.0 V, red otherwise
-	- [ ] Assemble and test circuit
+- [x] ADC
+	- [x] Connect potentiometer ADC, and LEDs
+	- [x] Code 
+		- [x] Polling function
+			- [x] Convert raw value to voltage
+			- [x] Turn on green LED if V > 2.0 V, red otherwise
+	- [x] Assemble and test circuit
 
 ## Task Setup
 
