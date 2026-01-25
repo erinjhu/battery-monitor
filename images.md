@@ -1,9 +1,11 @@
 ### Jan 24, 2026
 
 - Set up circuit to use ADC polling to choose an LED depending on potentiometer value
+- Set up 3 FreeRTOS tasks and got each one to print at UART every 1, 2, or 3 seconds
 
-![LED and potentiometer - polling](adc_polling_led_potentiometer1.png)
-![LED and potentiometer - polling](adc_polling_led_potentiometer2.png)
+![LED and potentiometer - polling](images/adc_polling_led_potentiometer1.png)
+![LED and potentiometer - polling](images/adc_polling_led_potentiometer2.png)
+![Multiple tasks printing at different frequencies](images/multiple_task_printing.png)
 
 ### Jan 23, 2026
 

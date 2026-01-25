@@ -1,0 +1,12 @@
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:65:6:send_def_task	1
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:69:6:send_task_2	1
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:73:6:send_task_3	1
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:83:5:main	1
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:170:6:SystemClock_Config	3
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:217:13:MX_USART2_UART_Init	2
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:250:13:MX_GPIO_Init	1
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:295:6:StartDefaultTask	1
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:315:6:Task2_init	1
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:329:6:Task3_init	1
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:345:6:HAL_TIM_PeriodElapsedCallback	2
+C:/Users/Hu/Desktop/projects/battery-monitor/tasks-and-priorities/Core/Src/main.c:363:6:Error_Handler	1

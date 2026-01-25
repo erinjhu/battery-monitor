@@ -2,7 +2,9 @@
 
 This file documents concepts I've been learning.
 
-Most of it is from [CircuitGator HQ's STM32 Beginner's Guide](https://youtube.com/playlist?list=PLGh4659DkyarOFZVtnah4KORCJzuPbWg_&si=7iypIOyyFD7IGzBB).
+### Resources Used
+- [CircuitGator HQ's STM32 Tutorials](https://youtube.com/playlist?list=PLGh4659DkyarOFZVtnah4KORCJzuPbWg_&si=7iypIOyyFD7IGzBB)
+- [ControllersTech's FreeRTOS Tutorials](https://youtube.com/playlist?list=PLfIJKC1ud8gj1t2y36sabPT4YcKzmN_5D&si=Jtzcy8ACzQ3xHdPo)
 
 ## GPIO
 
@@ -158,6 +160,13 @@ HAL_ADC_GetValue(ADC_HandleTypeDef *hadc)
 - Asynchronous - doesn't need clock
 - Duplex communication - can send and receive data simultaneously
 
+Use `uint8_t` because UART transmits one byte/char at a time
+
+```c
+uint8_t data[] = "Data to transmit on UART\n";
+HAL_UART_Transmit(&huart2, data, sizeof(data), 500);
+```
+
 ### Data
 
 Made of...
@@ -223,3 +232,47 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 }
 ```
 
+## FreeRTOS
+
+
+When setting up the project in STM32CubeMX, change `USE_PREEMPTION` to `Enabled`.
+  - Allows higher priority tasks to take control from lower priority tasks
+  - Importance: prevent delays to critical tasks 
+
+
+| Code   | Description                     |
+| ----------- | ------------------------- |
+| `osThreadId taskHandleName;`   | set up the task handle        |
+| `void taskInitializationFunction(void const* argument)`; | main function of a task |
+|`osThreadDef(Task2, Task2_init, osPriorityNormal, 0, 128);`|create the thread and set the name, entry point, priority, instances (0 = 1 instance), and stack size (bytes)|
+| `Task2Handle = osThreadCreate(osThread(Task2), NULL);`|create the task |
+
+For the task functions, put an infinite loop since it doesn't return a value
+
+### Multiple Tasks Printing to UART
+
+Each task function:
+
+```c
+void Task2_init(void const * argument)
+{
+  /* USER CODE BEGIN Task2_init */
+  /* Infinite loop */
+  for(;;)
+  {
+    uint8_t data[] = "Hello from Task2\r\n";
+	HAL_UART_Transmit(&huart2, data, sizeof(data), 500);
+    osDelay(1000);
+  }
+  /* USER CODE END Task2_init */
+}
+```
+
+All the tasks use the same UART. Make the delay the same for each task.
+- If all 3 tasks have the same priority, each task will transmit every 3 seconds.
+  - The scheduler will run them using round-robin (tasks take turns; each turn is equal)
+  - The time slice for each turn allocated to each task's turn depends on the config settings
+- If you make them all have different priorities, all 3 will appear to print at the same time.
+  - Calling osDelay(1000) makes a task go to sleep
+  - Run the highest priority task, then it goes to sleep. Then the next priority task will run.
+  - Since printing happens quickly, the scheduler will go to the next priority task immediately after
