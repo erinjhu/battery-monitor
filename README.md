@@ -18,7 +18,8 @@ Real-time battery monitor made with STM32 and FreeRTOS
 
 ## Task Setup
 
-- [ ] Set up FreeRTOS
+- [x] Set up FreeRTOS
+- [x] Learn how to use FreeRTOS tasks
 - [ ] Migrate testing code to RTOS tasks
 	- [ ] Read background info on volatile keyword
 	- [ ] Set stack size

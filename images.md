@@ -1,3 +1,9 @@
+### Jan 25, 2026
+
+- Create, suspend, resume, block, and terminate a task
+
+![Suspend and resume task](images/suspend_resume_task.png)
+
 ### Jan 24, 2026
 
 - Set up circuit to use ADC polling to choose an LED depending on potentiometer value

@@ -234,18 +234,17 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 ## FreeRTOS
 
+### Tasks
 
 When setting up the project in STM32CubeMX, change `USE_PREEMPTION` to `Enabled`.
   - Allows higher priority tasks to take control from lower priority tasks
   - Importance: prevent delays to critical tasks 
 
 
-| Code   | Description                     |
-| ----------- | ------------------------- |
-| `osThreadId taskHandleName;`   | set up the task handle        |
+
 | `void taskInitializationFunction(void const* argument)`; | main function of a task |
 |`osThreadDef(Task2, Task2_init, osPriorityNormal, 0, 128);`|create the thread and set the name, entry point, priority, instances (0 = 1 instance), and stack size (bytes)|
-| `Task2Handle = osThreadCreate(osThread(Task2), NULL);`|create the task |
+| `Task2Handle = osThreadCreate(osThread(Task2), NULL);`|assign the task to the handle |
 
 For the task functions, put an infinite loop since it doesn't return a value
 
@@ -256,7 +255,9 @@ Each task function:
 ```c
 void Task2_init(void const * argument)
 {
-  /* USER CODE BEGIN Task2_init */
+  /* US| Code   | Description                     |
+| ----------- | ------------------------- |
+| `osThreadId taskHandleName;`   | set up the task handle (variable that stores a reference to a thread/task)       |ER CODE BEGIN Task2_init */
   /* Infinite loop */
   for(;;)
   {
@@ -276,3 +277,39 @@ All the tasks use the same UART. Make the delay the same for each task.
   - Calling osDelay(1000) makes a task go to sleep
   - Run the highest priority task, then it goes to sleep. Then the next priority task will run.
   - Since printing happens quickly, the scheduler will go to the next priority task immediately after
+
+
+### Scheduling
+
+`osKernelStart();` 
+- starts the RTOS kernel scheduler, which executes the created tasks/threads
+- RTOS takes over CPU and runs tasks/threads according to priorities
+- code in `main()` won't run unless tasks are deleted or scheduler is stopped
+
+When you call `osDelay()` in a task, it blocks that task. The scheduler can switch to other ready tasks.
+
+**Block task** 
+
+Scheduler can switch to other ready tasks. If $f=1\text{kHz}$ then $1\text{ tick}=1\text{ms}$.
+
+|Code|Description|
+|--|--|
+|`osDelay(x)`|delay for x ticks starting from current time|
+|`osDelayUntil(&refTime, x)`|delay task until tick count reaches refTime + x|
+
+
+### Managing Tasks
+
+| Code   | Description                     |
+| ----------- | ------------------------- |
+| `osThreadSuspend(osThreadId thread_id)`   | Suspend |
+|`osThreadResume(osThreadId thread_id)`|Resume|
+|`osThreadTerminate(osThreadId thread_id)`|Terminate (can't be resumed after)|
+|`osThreadSuspendAll(osThreadId thread_id)`|Suspend all|
+|`osThreadResumeAll(osThreadId thread_id)`|Resume all|
+|`osThreadYield()`|Pass control to next ready thread|
+|`osThreadSetPriority(osThreadId thread_id, osPriority priority)`|Set priority|
+
+|`osDelay()`|`osThreadSuspend()`|
+|--|--|
+|Pause task for specific amount of time. Task automatically becomes ready after and scheduler will resume task.|Pause task until you explicitly resume it with `osThreadResume()`.|
