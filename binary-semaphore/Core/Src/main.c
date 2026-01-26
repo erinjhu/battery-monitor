@@ -291,13 +291,10 @@ void StartNormalTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    char *str1 = "Entered NormalTask and waiting for semaphore\r\n";
+    char *str1 = "Entered NormalTask \r\n";
     HAL_UART_Transmit(&huart2, (uint8_t *) str1, strlen(str1), 100);
-    // Make task wait until another task gives/releases the semaphore
-    osSemaphoreWait(BinSemHandle, osWaitForever);
-    char *str3 = "Semaphore acquired by normal task.\r\n";
-    while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)); // wait until the pin goes low
-    char *str2 = "Leaving NormalTask and releasing semaphore\r\n";
+    
+    char *str2 = "Leaving NormalTask\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t *) str2, strlen(str2), 100);
     osSemaphoreRelease(BinSemHandle);
     osDelay(500);
@@ -318,11 +315,11 @@ void StartHighTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    char *str1 = "Entered HighTask and waiting for semaphore\r\n";
+    char *str1 = "Entered LowTask and waiting for semaphore\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t *) str1, strlen(str1), 100);
     osSemaphoreWait(BinSemHandle, osWaitForever);
     char *str3 = "Semaphore acquired by high task.\r\n";    
-    char *str2 = "Leaving HighTask and releasing semaphore\r\n";
+    char *str2 = "Leaving LowTask and releasing semaphore\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t *) str2, strlen(str2), 100);
     osSemaphoreRelease(BinSemHandle);
     osDelay(500);
@@ -345,6 +342,10 @@ void StartLowTask(void const * argument)
   {
     char *str1 = "Entered LowTask\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t *) str1, strlen(str1), 100);
+    // Make task wait until another task gives/releases the semaphore
+    osSemaphoreWait(BinSemHandle, osWaitForever);
+    char *str3 = "Semaphore acquired by low task.\r\n";
+    while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13)); // wait until the pin goes low
     char *str2 = "Leaving LowTask\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t *) str2, strlen(str2), 100);
     osDelay(500);

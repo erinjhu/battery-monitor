@@ -325,3 +325,9 @@ Scheduler can switch to other ready tasks. If $f=1\text{kHz}$ then $1\text{ tick
 |`int32_t osSemaphoreWait(osSemaphoreId semaphore_id, uint32_t millisec)`|Block the task until the semaphore is available or the timeout has passed|
 |`osStatus osSemaphoreRelease(osSemaphoreId semaphore_id)`|Release semaphore|
 
+**Priority Inversion**
+
+- High priority task is blocked because a lower priority task has the semaphore.
+- Need to wait until low priority task releases semaphore
+
+At any time, the scheduler will run the highest priority task that is ready or running.
