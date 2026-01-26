@@ -313,3 +313,15 @@ Scheduler can switch to other ready tasks. If $f=1\text{kHz}$ then $1\text{ tick
 |`osDelay()`|`osThreadSuspend()`|
 |--|--|
 |Pause task for specific amount of time. Task automatically becomes ready after and scheduler will resume task.|Pause task until you explicitly resume it with `osThreadResume()`.|
+
+- When you call `osDelay()` in a task's function, it will yeild the CPU for that amount of time
+  - After the delay, the scheduler will run whatever task has a higher priority
+
+### Binary Semaphore
+
+|Code|Description|
+|--|--|
+|`osSemaphoreId osSemaphoreCreate(const osSemaphoreDef_t * semaphore_def, int32_t count)`|Create semaphore. For binary semaphore, count = 1|
+|`int32_t osSemaphoreWait(osSemaphoreId semaphore_id, uint32_t millisec)`|Block the task until the semaphore is available or the timeout has passed|
+|`osStatus osSemaphoreRelease(osSemaphoreId semaphore_id)`|Release semaphore|
+
