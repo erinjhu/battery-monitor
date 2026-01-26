@@ -331,3 +331,7 @@ Scheduler can switch to other ready tasks. If $f=1\text{kHz}$ then $1\text{ tick
 - Need to wait until low priority task releases semaphore
 
 At any time, the scheduler will run the highest priority task that is ready or running.
+
+### Counting Semaphore
+
+The semaphore doesn't have to be released by the task that acquired it
