@@ -241,7 +241,9 @@ When setting up the project in STM32CubeMX, change `USE_PREEMPTION` to `Enabled`
   - Importance: prevent delays to critical tasks 
 
 
-
+| Code   | Description                     |
+| ----------- | ------------------------- |
+| `osThreadId taskHandleName;`   | set up the task handle (variable that stores a reference to a thread/task)       |
 | `void taskInitializationFunction(void const* argument)`; | main function of a task |
 |`osThreadDef(Task2, Task2_init, osPriorityNormal, 0, 128);`|create the thread and set the name, entry point, priority, instances (0 = 1 instance), and stack size (bytes)|
 | `Task2Handle = osThreadCreate(osThread(Task2), NULL);`|assign the task to the handle |
@@ -250,14 +252,14 @@ For the task functions, put an infinite loop since it doesn't return a value
 
 ### Multiple Tasks Printing to UART
 
+
+
 Each task function:
 
 ```c
 void Task2_init(void const * argument)
 {
-  /* US| Code   | Description                     |
-| ----------- | ------------------------- |
-| `osThreadId taskHandleName;`   | set up the task handle (variable that stores a reference to a thread/task)       |ER CODE BEGIN Task2_init */
+  /* USER CODE BEGIN Task2_init */
   /* Infinite loop */
   for(;;)
   {
@@ -335,3 +337,70 @@ At any time, the scheduler will run the highest priority task that is ready or r
 ### Counting Semaphore
 
 The semaphore doesn't have to be released by the task that acquired it
+
+## Queue
+
+### Simple Queue Tutorial
+- Create tasks:
+  - High priority sender
+  - Low priority sender
+  - Receiver
+
+
+```c
+BaseType_t xTaskCreate(
+    TaskFunction_t pvTaskCode,    // Pointer to the task entry function
+    const char * const pcName,    // Name of the task (for debugging)
+    configSTACK_DEPTH_TYPE usStackDepth, // Stack size in words, not bytes
+    void *pvParameters,           // Parameters to pass to the task
+    UBaseType_t uxPriority,       // Task priority
+    TaskHandle_t *pxCreatedTask   // Pointer to return the task handle (can be NULL if you don't need to reference/interact with task after creating it)
+);
+```
+
+Create queue
+```c
+xQueueCreate(
+    UBaseType_t uxQueueLength,   // The maximum number of items the queue can hold
+    UBaseType_t uxItemSize       // The size (in bytes) of each item in the queue
+);
+```
+
+```c
+uint32_t TickDelay = pdMS_To_TICKS(2000); // Conver milliseconds to # of FreeRTOS ticks
+// # of ticks per ms depends on the tick rate (config settings)
+vTaskDelay(TickDelay);
+```
+
+```c
+BaseType_t xQueueSend(
+    QueueHandle_t xQueue,   // The queue to which the item will be sent
+    const void * pvItemToQueue, // Pointer to the item to send
+    TickType_t xTicksToWait     // How long to wait if the queue is full (in ticks)
+);
+```
+
+
+```c
+int sprintf(
+	char *str, // pointer to buffer to store the string
+	const char *format, // the actual string with formats such as %d
+	... // values for the formats; e.g. an int variable for %d
+);
+
+```
+
+```c
+BaseType_t xQueueReceive(
+    QueueHandle_t xQueue,     // The queue to receive from
+    void *pvBuffer,           // Pointer to buffer to store the received item
+    TickType_t xTicksToWait   // How long to wait if the queue is empty (in ticks)
+);
+```
+
+## FreeRTOS Prefixes
+
+x: function returns a value, which is usually BaseType_t (status/result)
+v: function returns void; no return value
+
+`BaseType_t` is the most efficient int type for the target architecture (usually int or long)
