@@ -374,9 +374,10 @@ void Receiver_Task (void *argument)
     {
       ptr = pvPortMalloc(100 * sizeof(char));
       sprintf(ptr, "Received from queue: \r\nCounter = %d\r\nLarge value = %u\r\nString = %s\r\n", Rptrtostruct->counter, Rptrtostruct->large_value, Rptrtostruct->str);
-      HAL_UART_Transmit(&huart2, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
+      HAL_UART_Transmit(&huart2, (uint8_t*)ptr, strlen(ptr), HAL_MAX_DELAY);
       vPortFree(ptr);
     }
+    
     vPortFree(Rptrtostruct);
     vTaskDelay(TickDelay);
   }

@@ -1223,18 +1223,21 @@ void Receiver_Task (void *argument)
  8000aba:	4910      	ldr	r1, [pc, #64]	@ (8000afc <Receiver_Task+0x9c>)
  8000abc:	68f8      	ldr	r0, [r7, #12]
  8000abe:	f003 ff39 	bl	8004934 <siprintf>
-      HAL_UART_Transmit(&huart2, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
- 8000ac2:	6938      	ldr	r0, [r7, #16]
+      HAL_UART_Transmit(&huart2, (uint8_t*)ptr, strlen(ptr), HAL_MAX_DELAY);
+ 8000ac2:	68f8      	ldr	r0, [r7, #12]
  8000ac4:	f7ff fb8c 	bl	80001e0 <strlen>
  8000ac8:	4603      	mov	r3, r0
  8000aca:	b29a      	uxth	r2, r3
  8000acc:	f04f 33ff 	mov.w	r3, #4294967295
- 8000ad0:	6939      	ldr	r1, [r7, #16]
+ 8000ad0:	68f9      	ldr	r1, [r7, #12]
  8000ad2:	4808      	ldr	r0, [pc, #32]	@ (8000af4 <Receiver_Task+0x94>)
  8000ad4:	f001 fbf4 	bl	80022c0 <HAL_UART_Transmit>
       vPortFree(ptr);
  8000ad8:	68f8      	ldr	r0, [r7, #12]
  8000ada:	f003 fe0b 	bl	80046f4 <vPortFree>
+    }
+    else{
+
     }
     vPortFree(Rptrtostruct);
  8000ade:	68bb      	ldr	r3, [r7, #8]
