@@ -334,6 +334,13 @@ Scheduler can switch to other ready tasks. If $f=1\text{kHz}$ then $1\text{ tick
 
 At any time, the scheduler will run the highest priority task that is ready or running.
 
+**Priority Inheritance**
+
+- A lower priority task temporarily becomes a higher priority
+- Prevents priority inversion
+- Allows the lower priority task to finish and then release the semaphore
+- Lower priority task doesn't get pre-empted before it releases the semaphore
+
 ### Counting Semaphore
 
 The semaphore doesn't have to be released by the task that acquired it
@@ -398,9 +405,38 @@ BaseType_t xQueueReceive(
 );
 ```
 
-## FreeRTOS Prefixes
+## Timers
+
+### One-Shot Timer
+- Do callback function once
+- Will not automatically restart (need to restart automatically)
+
+### Auto-Reload Timer
+- Will automatically restart callback function; callback function will run periodically
+
+## Info 
+
+
+
+### FreeRTOS
+- RTOS kernel
+- Used for multitasking
+
+#### Prefixes
 
 x: function returns a value, which is usually BaseType_t (status/result)
 v: function returns void; no return value
 
 `BaseType_t` is the most efficient int type for the target architecture (usually int or long)
+
+### CMSIS
+- Like a wrapper 
+- Standardized APIs to work with different RTOS kernels (FreeRTOS, etc.)
+
+### Kernel
+- Part of an OS
+- Manages tasks, scheduling, memory, hardware access
+
+### OS
+- Includes the kernel
+- Also includes drivers, libraries, user interfaces
