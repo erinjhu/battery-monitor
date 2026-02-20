@@ -66,6 +66,7 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 SemaphoreHandle_t SimpleMutex;
+SemaphoreHandle_t BinSempahore;
 
 TaskHandle_t HPT_Handler;
 TaskHandle_t MPT_Handler;
@@ -76,10 +77,10 @@ void MPT_Task (void *argument);
 void LPT_Task (void *argument);
 void Send_Uart (char *str) 
 {
-  xSemaphoreTake(SimpleMutex, portMAX_DELAY);
+  xSemaphoreTake(BinSempahore, portMAX_DELAY);
+  HAL_Delay(5000);
   HAL_UART_Transmit(&huart2, str, strlen(str), HAL_MAX_DELAY);
-  HAL_Delay(2000);
-  xSemaphoreGive(SimpleMutex);
+  xSemaphoreGive(BinSempahore);
 }
 /* USER CODE END 0 */
 
@@ -119,9 +120,18 @@ int main(void)
   {
     HAL_UART_Transmit(&huart2, "Mutex created\r\n", 15, 1000);
   }
+
+  BinSempahore = xSemaphoreCreateBinary();
+  if (BinSempahore != NULL)
+  {
+    HAL_UART_Transmit(&huart2, "Semaphore created\r\n", 15, 1000);
+  }
+
+  xSemaphoreGive(BinSemaphore);
+
   xTaskCreate(HPT_Task, "HPT", 128, NULL, 3, &HPT_Handler);
   xTaskCreate(HPT_Task, "MPT", 128, NULL, 2, &HPT_Handler);
-  xTaskCreate(HPT_Task, "LPT", 128, NULL, 1, &HPT_Handler);
+  // xTaskCreate(HPT_Task, "LPT", 128, NULL, 1, &HPT_Handler);
   vTaskStartScheduler();
   /* USER CODE END 2 */
 
@@ -287,12 +297,12 @@ void HPT_Task (void *argument)
   char *strtosend = "--------- HPT ---------";
   while (1)
   {
-    char *str = "Enter HPT and about to take mutex\r\n";
+    char *str = "Enter HPT and about to take sem\r\n";
     HAL_UART_Transmit(&huart2, str, strlen(str), HAL_MAX_DELAY);
     Send_Uart(strtosend);
     char *str2 = "Leaving HPT\r\n";
     HAL_UART_Transmit(&huart2, str2, strlen(str2), HAL_MAX_DELAY);
-    vTaskDelay(1500);
+    vTaskDelay(750);
   }
 }
 void MPT_Task (void *argument)
@@ -300,12 +310,26 @@ void MPT_Task (void *argument)
   char *strtosend = "--------- MPT ---------";
   while (1)
   {
-    char *str = "Enter MPT and about to take mutex\r\n";
+    char *str = "Enter MPT and about to take sem\r\n";
     HAL_UART_Transmit(&huart2, str, strlen(str), HAL_MAX_DELAY);
     Send_Uart(strtosend);
     char *str2 = "Leaving MPT\r\n";
     HAL_UART_Transmit(&huart2, str2, strlen(str2), HAL_MAX_DELAY);
     vTaskDelay(2000);
+  }
+}
+
+void LPT_Task (void *argument)
+{
+  char *strtosend = "--------- LPT ---------";
+  while (1)
+  {
+    char *str = "Enter LPT and about to take sem\r\n";
+    HAL_UART_Transmit(&huart2, str, strlen(str), HAL_MAX_DELAY);
+    Send_Uart(strtosend);
+    char *str2 = "LPTT\r\n";
+    HAL_UART_Transmit(&huart2, str2, strlen(str2), HAL_MAX_DELAY);
+    vTaskDelay(1000);
   }
 }
 /* USER CODE END 4 */
