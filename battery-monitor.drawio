@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.5.4" pages="2">
   <diagram name="Tasks" id="K8p4L_HfBHCprd8C0vr4">
-    <mxGraphModel dx="863" dy="662" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1654" pageHeight="2336" math="0" shadow="0">
+    <mxGraphModel dx="2295" dy="1096" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1654" pageHeight="2336" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -28,8 +28,8 @@
             <mxPoint x="135" y="424" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="JfeVMuCjjTXKL2Y2_Tp3-9" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="TaskSensor writes to fVoltage" vertex="1">
-          <mxGeometry height="30" width="60" x="102" y="547" as="geometry" />
+        <mxCell id="JfeVMuCjjTXKL2Y2_Tp3-9" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="If mutex is taken,TaskSensor writes to fVoltage" vertex="1">
+          <mxGeometry height="30" width="60" x="6" y="562" as="geometry" />
         </mxCell>
         <mxCell id="JfeVMuCjjTXKL2Y2_Tp3-15" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Wait for UART queue" vertex="1">
           <mxGeometry height="30" width="60" x="320" y="311" as="geometry" />
@@ -112,16 +112,16 @@
         <mxCell id="JfeVMuCjjTXKL2Y2_Tp3-43" edge="1" parent="1" source="JfeVMuCjjTXKL2Y2_Tp3-42" style="endArrow=classic;html=1;rounded=0;fontSize=12;startSize=8;endSize=8;curved=1;exitX=0.433;exitY=1.267;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
             <mxPoint x="343" y="557" as="sourcePoint" />
-            <mxPoint x="134" y="530" as="targetPoint" />
+            <mxPoint x="45" y="541" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="JfeVMuCjjTXKL2Y2_Tp3-44" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Give mutex" vertex="1">
-          <mxGeometry height="30" width="60" x="114" y="976" as="geometry" />
+          <mxGeometry height="30" width="60" x="18" y="991" as="geometry" />
         </mxCell>
         <mxCell id="JfeVMuCjjTXKL2Y2_Tp3-45" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;fontSize=12;startSize=8;endSize=8;curved=1;" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="133" y="594" as="sourcePoint" />
-            <mxPoint x="133" y="643" as="targetPoint" />
+            <mxPoint x="37" y="609" as="sourcePoint" />
+            <mxPoint x="37" y="658" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="cS4cPajK5IV1y6uNhieH-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="ISRButton" vertex="1">
@@ -146,7 +146,7 @@
           <mxGeometry height="30" width="60" x="785" y="453" as="geometry" />
         </mxCell>
         <mxCell id="cS4cPajK5IV1y6uNhieH-7" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Send message for new data to UART queue" vertex="1">
-          <mxGeometry height="30" width="60" x="108" y="700" as="geometry" />
+          <mxGeometry height="30" width="60" x="12" y="715" as="geometry" />
         </mxCell>
         <mxCell id="cS4cPajK5IV1y6uNhieH-10" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;fontSize=12;startSize=8;endSize=8;curved=1;" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
@@ -156,18 +156,66 @@
         </mxCell>
         <mxCell id="cS4cPajK5IV1y6uNhieH-11" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;fontSize=12;startSize=8;endSize=8;curved=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="137" y="778" as="sourcePoint" />
-            <mxPoint x="139" y="841" as="targetPoint" />
+            <mxPoint x="41" y="793" as="sourcePoint" />
+            <mxPoint x="43" y="856" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="cS4cPajK5IV1y6uNhieH-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Give semaphore" vertex="1">
-          <mxGeometry height="30" width="60" x="108" y="858" as="geometry" />
+          <mxGeometry height="30" width="60" x="12" y="873" as="geometry" />
         </mxCell>
         <mxCell id="cS4cPajK5IV1y6uNhieH-13" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;fontSize=12;startSize=8;endSize=8;curved=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
-            <mxPoint x="137" y="909" as="sourcePoint" />
-            <mxPoint x="139" y="972" as="targetPoint" />
+            <mxPoint x="41" y="924" as="sourcePoint" />
+            <mxPoint x="43" y="987" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Init hardware" vertex="1">
+          <mxGeometry height="60" width="120" x="-343" y="171" as="geometry" />
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-15" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="If timeout, send message for error to UART queue" vertex="1">
+          <mxGeometry height="30" width="60" x="164" y="573" as="geometry" />
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-16" edge="1" parent="1" source="JfeVMuCjjTXKL2Y2_Tp3-42" style="endArrow=classic;html=1;rounded=0;fontSize=12;startSize=8;endSize=8;curved=1;exitX=0.941;exitY=1.3;exitDx=0;exitDy=0;exitPerimeter=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="193" y="583" as="sourcePoint" />
+            <mxPoint x="183" y="528" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="If queue is full, overwrite the oldest value" vertex="1">
+          <mxGeometry height="30" width="60" x="171" y="723" as="geometry" />
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-18" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;fontSize=12;startSize=8;endSize=8;curved=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="200" y="639" as="sourcePoint" />
+            <mxPoint x="203" y="697" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-19" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="If queue is full, overwrite the oldest value" vertex="1">
+          <mxGeometry height="30" width="60" x="785" y="611" as="geometry" />
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-20" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;fontSize=12;startSize=8;endSize=8;curved=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="814" y="527" as="sourcePoint" />
+            <mxPoint x="817" y="585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-21" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Clock configuration (RCC) to 72 MHz" vertex="1">
+          <mxGeometry height="30" width="60" x="-313" y="304" as="geometry" />
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-22" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Configure GPIO pins for LED output and button interrupt" vertex="1">
+          <mxGeometry height="30" width="60" x="-320" y="393" as="geometry" />
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-23" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Configure ADC resolution and channel" vertex="1">
+          <mxGeometry height="30" width="60" x="-326" y="513" as="geometry" />
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-24" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Configure UART" vertex="1">
+          <mxGeometry height="30" width="60" x="-330" y="626" as="geometry" />
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-25" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Initialize mutex, semaphore, and queue" vertex="1">
+          <mxGeometry height="30" width="60" x="-330" y="723" as="geometry" />
+        </mxCell>
+        <mxCell id="cS4cPajK5IV1y6uNhieH-26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Create tasks" vertex="1">
+          <mxGeometry height="30" width="60" x="-323" y="825" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
