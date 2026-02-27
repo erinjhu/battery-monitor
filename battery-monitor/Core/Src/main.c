@@ -37,10 +37,56 @@ typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+typedef enum
+{
+  MSG_TYPE_VOLTAGE,
+  MSG_TYPE_BUTTON,
+  MSG_TYPE_ERROR
+} MsgType_t;
+
+typedef enum
+{
+  ERR_CODE_SUCCESS = 0,
+  ERR_CODE_UNKNOWN = 1,
+  ERR_CODE_INVALID_ARG = 2,
+  ERR_CODE_QUEUE_FULL = 3,
+  ERR_CODE_MUTEX_TIMEOUT = 4,
+  ERR_CODE_BUFF_TOO_SMALL = 5,
+  ERR_CODE_LOG_MSG_SILENCED = 6,
+  ERR_CODE_INVALID_STATE = 7,
+  ERR_CODE_UNSUPPORTED_EVENT = 8,
+  ERR_CODE_BUFF_OVERFLOW = 9,
+  ERR_CODE_SEMAPHORE_TIMEOUT = 10,
+  ERR_CODE_SEMAPHORE_FULL = 11,
+  ERR_CODE_QUEUE_EMPTY = 12,
+  ERR_CODE_NOT_MUTEX_OWNER = 13,
+  ERR_CODE_PERSISTENT_CORRUPTED = 14,
+  ERR_CODE_FAILED_UNPACK = 15,
+  ERR_CODE_FAILED_PACK = 16,
+  ERR_CODE_INVALID_STATE_TRANSITION = 17,
+  ERR_CODE_FREERTOS_ASSERT_FAIL = 18,
+  ERR_CODE_FAILED_STACK_CANARY = 19,
+  ERR_CODE_ADC_TIMEOUT = 20,
+} ErrorCode_t;
+
+typedef struct 
+{
+  MsgType_t type;  
+  union {
+    float value;  
+    uint8_t str[8];
+    ErrorCode_t errCode;
+  };
+  
+} UARTMsg_t;
+
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+
+
 
 /* USER CODE END PM */
 
@@ -120,7 +166,7 @@ const osSemaphoreAttr_t xBinSem_attributes = {
   .cb_size = sizeof(xBinSemControlBlock),
 };
 /* USER CODE BEGIN PV */
-
+volatile float fBatteryVoltage;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -447,9 +493,48 @@ void vTaskSensor(void *argument)
 {
   /* USER CODE BEGIN vTaskSensor */
   /* Infinite loop */
+  osStatus_t errCode;
   for(;;)
   {
-    osDelay(1);
+    HAL_ADC_Start(&hadc1);
+
+
+    errCode = HAL_ADC_PollForConversion(&hadc1,100);
+    if (errCode == osErrorTimeout)
+    {
+      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_ADC_TIMEOUT};
+      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0); // timeout = 0 --> return immediately
+      continue; // skip the rest of this loop iteration
+    }
+    else if (errCode != osOK) 
+    {
+      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
+      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
+      return;
+    }
+
+    errCode = osMutexAcquire(xMutexHandle,100);
+    if (errCode == osErrorTimeout)
+    {
+      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_MUTEX_TIMEOUT};
+      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
+      continue; 
+    }
+    else if (errCode != osOK) 
+    {
+      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
+      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
+      return;
+    }
+
+    uint32_t adcRaw = HAL_ADC_GetValue(&hadc1);
+    fBatteryVoltage = (adcRaw * 3.3f) / 4095.0f;
+
+    UARTMsg_t batteryMessage = {.type = MSG_TYPE_VOLTAGE, .value = fBatteryVoltage};
+    osMessageQueuePut(xUARTQueueHandle, &batteryMessage, 0U, 0);
+    osSemaphoreRelease(xBinSemHandle);
+    osMutexRelease(xMutexHandle);
+    osDelay(100);
   }
   /* USER CODE END vTaskSensor */
 }
