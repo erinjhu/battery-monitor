@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -220,7 +221,8 @@ int main(void)
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  uint16_t readVal;
+  char tx_buffer[20];
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -283,9 +285,21 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+    // code to verify that adc works
+
+  //   printf("test print\r\n");
+	//  HAL_ADC_Start(&hadc1);
+	//  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	//  readVal = HAL_ADC_GetValue(&hadc1);
+
+	//  sprintf(tx_buffer, "%hu\r\n", readVal);
+	//  HAL_UART_Transmit(&huart2, (uint8_t*)tx_buffer, strlen(tx_buffer), HAL_MAX_DELAY);
+	//  HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }
@@ -461,7 +475,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -492,6 +505,7 @@ void StartDefaultTask(void *argument)
 void vTaskSensor(void *argument)
 {
   /* USER CODE BEGIN vTaskSensor */
+  HAL_UART_Transmit(&huart2, (uint8_t*)"Sensor Task Started\r\n", 21, 100);
   /* Infinite loop */
   osStatus_t errCode;
   for(;;)
@@ -499,14 +513,14 @@ void vTaskSensor(void *argument)
     HAL_ADC_Start(&hadc1);
 
 
-    errCode = HAL_ADC_PollForConversion(&hadc1,100);
-    if (errCode == osErrorTimeout)
+    HAL_StatusTypeDef halStatus = HAL_ADC_PollForConversion(&hadc1,100);
+    if (halStatus == HAL_TIMEOUT)
     {
       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_ADC_TIMEOUT};
       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0); // timeout = 0 --> return immediately
       continue; // skip the rest of this loop iteration
     }
-    else if (errCode != osOK) 
+    else if (halStatus != HAL_OK) 
     {
       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
@@ -531,7 +545,7 @@ void vTaskSensor(void *argument)
     fBatteryVoltage = (adcRaw * 3.3f) / 4095.0f;
 
     UARTMsg_t batteryMessage = {.type = MSG_TYPE_VOLTAGE, .value = fBatteryVoltage};
-    osMessageQueuePut(xUARTQueueHandle, &batteryMessage, 0U, 0);
+    osMessageQueuePut(xUARTQueueHandle, &batteryMessage, 0U, 10);
     osSemaphoreRelease(xBinSemHandle);
     osMutexRelease(xMutexHandle);
     osDelay(100);
@@ -567,10 +581,32 @@ void vTaskAlarm(void *argument)
 void vTaskUART(void *argument)
 {
   /* USER CODE BEGIN vTaskUART */
+  HAL_UART_Transmit(&huart2, (uint8_t*)"UART Task Started\r\n", 19, 100);
+  UARTMsg_t msg;
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    if (osMessageQueueGet(xUARTQueueHandle,&msg,NULL,osWaitForever) == osOK)
+    // use osWaitForever to block the task until a msg arrives in the queue
+    {
+      char buffer[64];
+      if (msg.type == MSG_TYPE_VOLTAGE)
+      {
+        // snprintf(buffer, sizeof(buffer), "Voltage: %u.%02u V\r\n", msg.value);
+        snprintf(buffer, sizeof(buffer), "Raw: %u\r\n", (unsigned int)(msg.value * 1000));
+        HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
+      }
+      else if (msg.type == MSG_TYPE_ERROR)
+      {
+        snprintf(buffer, sizeof(buffer), "Error code: %d \r\n", msg.errCode);
+        HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
+      }
+      else if (msg.type == MSG_TYPE_BUTTON)
+      {
+        snprintf(buffer, sizeof(buffer), "Button pressed");
+        HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
+      }
+    }
   }
   /* USER CODE END vTaskUART */
 }
