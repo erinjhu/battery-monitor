@@ -444,3 +444,23 @@ v: function returns void; no return value
 ### OS
 - Includes the kernel
 - Also includes drivers, libraries, user interfaces
+
+## Hardware
+
+### LEDs
+
+GPIO_OUT -->  LED (long/anode/+) --> LED (short/cathode/-) --> resistor --> GND
+
+### Push Button
+
+Wiring:
+3.3V --> leg --> leg --> resistor --> GND
+3.3V --> leg --> leg --> GPIO_IN
+
+Notes:
+- Pull-up
+  - Default state is high
+  - Press button: low
+- Pull-down
+  - Default state is low
+  - Press button: high

@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -88,6 +87,7 @@ typedef struct
 /* USER CODE BEGIN PM */
 #define GPIO_GREEN_LED GPIO_PIN_5
 #define GPIO_RED_LED GPIO_PIN_6
+#define GPIO_BUTTON GPIO_PIN_13
 
 /* USER CODE END PM */
 
@@ -169,6 +169,10 @@ const osSemaphoreAttr_t xBinSem_attributes = {
 /* USER CODE BEGIN PV */
 volatile float fBatteryVoltage;
 const float fThresholdVoltage = 1.5f;
+// button debouncing
+uint32_t currentTime;
+uint32_t previousTime;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -457,11 +461,11 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, LD2_Pin|GPIO_PIN_6, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : B1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LD2_Pin PA6 */
   GPIO_InitStruct.Pin = LD2_Pin|GPIO_PIN_6;
@@ -470,12 +474,28 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
+{
+  // HAL_UART_Transmit(&huart2, (uint8_t*)"ISR Started\r\n", 21, 100);
+  currentTime = HAL_GetTick();
+  if (GPIO_PIN == GPIO_BUTTON && (currentTime - previousTime > 5))
+  {
+    //HAL_GPIO_TogglePin(GPIOA, GPIO_GREEN_LED);
+    UARTMsg_t msg = {.type = MSG_TYPE_BUTTON};
+    osMessageQueuePut(xUARTQueueHandle, &msg, 0U, 0);
+    previousTime = currentTime;
+  }
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -491,7 +511,17 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    // if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET) // Button pressed (active low)
+    // {
+    //     HAL_UART_Transmit(&huart2, (uint8_t*)"Button pressed\r\n", 30, 100);
+    //     HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_SET);   // Turn on LED
+    // }
+    // else
+    // {
+    //     HAL_UART_Transmit(&huart2, (uint8_t*)"Button relesed\r\n", 30, 100);
+    //     HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET); // Turn off LED
+    // }
+    osDelay(1000);
   }
   /* USER CODE END 5 */
 }
