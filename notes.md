@@ -341,6 +341,10 @@ At any time, the scheduler will run the highest priority task that is ready or r
 - Allows the lower priority task to finish and then release the semaphore
 - Lower priority task doesn't get pre-empted before it releases the semaphore
 
+|Mutex|Bin Semaphore|Counting Semaphore|
+|--|--|--|
+|only one "bathroom key", strict ownership|flag for go/wait|limited number of "tickets", no strict ownership|
+
 ### Counting Semaphore
 
 The semaphore doesn't have to be released by the task that acquired it

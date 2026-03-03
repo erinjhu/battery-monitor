@@ -86,8 +86,8 @@ typedef struct
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
-
+#define GPIO_GREEN_LED GPIO_PIN_5
+#define GPIO_RED_LED GPIO_PIN_6
 
 /* USER CODE END PM */
 
@@ -168,6 +168,7 @@ const osSemaphoreAttr_t xBinSem_attributes = {
 };
 /* USER CODE BEGIN PV */
 volatile float fBatteryVoltage;
+const float fThresholdVoltage = 1.5f;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -563,10 +564,40 @@ void vTaskSensor(void *argument)
 void vTaskAlarm(void *argument)
 {
   /* USER CODE BEGIN vTaskAlarm */
+  HAL_UART_Transmit(&huart2, (uint8_t*)"Alarm Task Started\r\n", 21, 100);
+  osStatus_t errCode;
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    
+    errCode = osSemaphoreAcquire(xBinSemHandle, HAL_MAX_DELAY);
+    if (errCode != osOK)
+    {
+      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
+      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
+      return;
+    }
+    errCode = osMutexAcquire(xMutexHandle,100);
+    if (errCode != osOK)
+    {
+      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
+      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
+      return;
+    }
+    float batteryVoltage = fBatteryVoltage;
+    osMutexRelease(xMutexHandle);
+    if (batteryVoltage > fThresholdVoltage)
+    {
+      HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on green LED\r\n", 30, 100);
+      HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_RESET);
+    } 
+    else
+    {
+      HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on red LED\r\n", 30, 100);
+      HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET);
+    }
   }
   /* USER CODE END vTaskAlarm */
 }

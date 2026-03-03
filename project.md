@@ -15,7 +15,7 @@
 |Component|Description|
 |--|--|
 |`SemaphoreHandle_t xMutex`|Manage shared access for `fBatteryVoltage`|
-|`SemaphoreHandle_t xBinSemaphore`|Signal to wake up `TaskAlarm`|
+|`SemaphoreHandle_t xBinSemaphore`|Wake up `TaskAlarm` only when there is new data|
 |`QueueHandle_t xUARTQueue`|Queue to send messages to `TaskUART`|
 
 ## Diagram
