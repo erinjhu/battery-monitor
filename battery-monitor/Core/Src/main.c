@@ -97,14 +97,14 @@ ADC_HandleTypeDef hadc1;
 UART_HandleTypeDef huart2;
 
 /* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
+static osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for xTaskSensor */
-osThreadId_t xTaskSensorHandle;
+static osThreadId_t xTaskSensorHandle;
 uint32_t xTaskSensorBuffer[ 128 ];
 osStaticThreadDef_t xTaskSensorControlBlock;
 const osThreadAttr_t xTaskSensor_attributes = {
@@ -116,7 +116,7 @@ const osThreadAttr_t xTaskSensor_attributes = {
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for xTaskAlarm */
-osThreadId_t xTaskAlarmHandle;
+static osThreadId_t xTaskAlarmHandle;
 uint32_t xTaskAlarmBuffer[ 128 ];
 osStaticThreadDef_t xTaskAlarmControlBlock;
 const osThreadAttr_t xTaskAlarm_attributes = {
@@ -128,7 +128,7 @@ const osThreadAttr_t xTaskAlarm_attributes = {
   .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for xTaskUART */
-osThreadId_t xTaskUARTHandle;
+static osThreadId_t xTaskUARTHandle;
 uint32_t xTaskUARTBuffer[ 128 ];
 osStaticThreadDef_t xTaskUARTControlBlock;
 const osThreadAttr_t xTaskUART_attributes = {
@@ -140,7 +140,7 @@ const osThreadAttr_t xTaskUART_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for xUARTQueue */
-osMessageQueueId_t xUARTQueueHandle;
+static osMessageQueueId_t xUARTQueueHandle;
 uint8_t xUARTQueueBuffer[ 16 * sizeof( UARTMsg_t ) ];
 osStaticMessageQDef_t xUARTQueueControlBlock;
 const osMessageQueueAttr_t xUARTQueue_attributes = {
@@ -170,8 +170,8 @@ const osSemaphoreAttr_t xBinSem_attributes = {
 volatile float fBatteryVoltage;
 const float fThresholdVoltage = 1.5f;
 // button debouncing
-uint32_t currentTime;
-uint32_t previousTime;
+volatile uint32_t currentTime;
+volatile uint32_t previousTime;
 
 /* USER CODE END PV */
 
