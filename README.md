@@ -1,132 +1,36 @@
- 
+# Battery Monitor
 
-# Components
+Embedded STM32 project for monitoring battery voltage, controlling LEDs, and communicating via UART. Uses FreeRTOS for multitasking and demonstrates key embedded concepts.
 
-## Tasks
+## Table of Contents
+1. [Project Overview](#project-overview)
+2. [Documentation Index](#documentation-index)
+3. [Version History](#version-history)
+4. [Next Steps](#next-steps)
 
-|Name|Priority|Stack Size|Periodicity/Trigger|Description|
-|--|--|--|--|--|
-|`static TaskHandle_t xTaskSensor`|Low|128 words|100 ms|Monitor voltage using ADC|
-|`staticTaskHandle_t xTaskAlarm`|High|128 words|Event-driven (sensor update)|Control LEDs|
-|`static TaskHandle_t xTaskUART`|Medium|128 words|Event-driven (sensor update)|Transmit data|
+## Documentation Index
+- [Voltage Manager](docs/voltage-manager.md)
+- [Peripherals](docs/peripherals.md)
+- [Interrupts](docs/interrupts.md)
 
-- **Static:** limit variable's scope to `main.c` file for encapsulation
-
-## Concurrency and Synchronization
-
-|Component|Description|
-|--|--|
-|`SemaphoreHandle_t xMutex`|Manage shared access for `fBatteryVoltage`|
-|`SemaphoreHandle_t xBinSemaphore`|Wake up `TaskAlarm` only when there is new data|
-|`QueueHandle_t xUARTQueue`|Queue to send messages to `TaskUART`|
-
-## Variables
-
-|Variable|Description|
-|--|--|
-|`volatile float fBatteryVoltage`|Battery voltage read by ADC|
-|`const float fThresholdVoltage`|Threshold for lighting up green/red LED|
-|`volatile uint32_t currentTime`|Button debouncing|
-|`volatile uint32_t prevTime`|Button debouncing|
-
-- **Volatile:** ensure compiler doesn't optimize read/writes
-
-
-## Diagram
+## Project Overview
+This project monitors battery voltage using an STM32 microcontroller, displays status with LEDs, and transmits data over UART. It demonstrates:
+- ADC voltage measurement
+- FreeRTOS tasks, mutexes, semaphores, and queues
+- Button debouncing and external interrupts
+- UART communication
 
 ![Flow chart for tasks](images/battery-monitor-flowchart.jpg)
 
-## Notes
+## Version History
 
-- Why does TaskSensor gives the semaphore before giving the mutex?
-  - Prevent tasks from fighting over the mutex before they are "synced" by the semaphore
-  - Give the semaphore first to let the scheduler organize the ready tasks 
-- Why statically allocate tasks, mutexes, and semaphores?
-  - Ensures determinism, no risk of runtime memory allocation failure
-
-## Messages
-
-```c
-typedef enum {
-    MSG_TYPE_VOLTAGE,
-    MSG_TYPE_BUTTON
-} MsgType_t;
-
-typedef struct {
-    MsgType_t type;    
-    float value;       
-} UARTMsg_t;
-```
-
-## ADC
-- **Resolution:** 12 bits
-- **Sampling rate:**
-- **Trigger source:** software
-
-## UART
-- **Baud rate:** 115200 bits/s
-- **Word length:** 8 bits
-- **Parity:** no parity 
-- **Stop bits:** 1
-
-## GPIO
-
-|Pin|Component|Description|
+|Version|Date|Description|
 |--|--|--|
-|PA5|GPIO_Output|Write to green LED|
-|PA6|GPIO_Output|Write to red LED|
-|PC13|GPIO_Input|Button press and interrupt|
-|PA2|USART_Tx|Transmit data from STM32|
-|PA3|USART_Rx|Transmit data to STM32|
-|PC1|ADC1_IN11|Read voltage value|
-|3.3V|n/a|Power the potentiometer and LEDs|
-|GND|n/a|Ground|
-
-## External Interrupt
-
-### STM32 EXTI Interrupts
-
-Pins can be configured to trigger an interrupt
-|Type|Description|Code|
-|--|--|--|
-|Rising edge|Pin transitions from low to high (0 --> 1)|`GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;`|
-|Falling edge|Pin transitions from high to low (1 --> 0)|`GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;`|
-|Either edge|Either|`GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;`|
-
-### Button Debouncing
-
-**Bouncing**
-- When pressing/releasing a button
-- **Contacts:** metal pieces inside that complete the circuit
-- **Bouncing:** the contacts quickly make and break contact, causing multiple on/off signals
-
-**Debouncing**
-```c
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
-{
-  // Record current time
-  currentTime = HAL_GetTick(); 
-  // Check which interrupt pin triggered the interrupt
-  // Ensure enough time passes since last button press (5 ms)
-  if (GPIO_PIN == GPIO_BUTTON && (currentTime - previousTime > 5)) 
-  {
-    UARTMsg_t msg = {.type = MSG_TYPE_BUTTON};
-    osMessageQueuePut(xUARTQueueHandle, &msg, 0U, 0);
-    previousTime = currentTime;
-  }
-}
-```
-
-## Timers
-
-**SysTick**
-- Hardware timer
-- Generates interrupt at regular interval
-- Used for button debouncing (`HAL_GetTick()`) and sleeping tasks (`osDelay()`)
-
+|3|2026-03|Integrate BMP180 sensor with I2C, monitor tasks with watchdog, implement direct task notifications, and use software timer for status LED|
+|2|2026-02|Turn on LED based on voltage in ADC, output to UART, and control battery variable with mutex and semaphore|
+|1|2026-01|Implement tutorials for basic ADC, semaphore, mutex, queue, tasks, and timer|
 
 ## Next Steps
 - BME280: I2C
 - 74HC595: SPI, 7-segment display
 - Buzzer: PWM tones
-- Make a diagram in Altium
