@@ -10,6 +10,7 @@ Embedded STM32 project for monitoring battery voltage, controlling LEDs, and com
 
 ## Documentation Index
 - [Voltage Manager](docs/voltage-manager.md)
+- [Environment Manager](docs/environment-manager.md)
 - [Peripherals](docs/peripherals.md)
 - [Interrupts](docs/interrupts.md)
 
