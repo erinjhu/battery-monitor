@@ -10,3 +10,4 @@ UART_HandleTypeDef huart2;
 osMessageQueueId_t xUARTQueueHandle;
 osSemaphoreId_t xBinSemHandle;
 osMutexId_t xMutexHandle;
+I2C_HandleTypeDef hi2c1;

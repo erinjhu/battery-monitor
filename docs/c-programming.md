@@ -34,4 +34,17 @@ extern volatile float fBatteryVoltage;
 ```
 Functions are extern by default, so you don't need to use `extern` for them.
 
+## Bit Manipulation
+
+### Endian-ness and Byte Order
+
+**Big-endian:** MSB first
+
+```c
+calib_raw[0] = 0x12 //(MSB)
+calib_raw[1] = 0x34 //(LSB)
+value = (0x12 << 8) | 0x34;
+// 0x1200 | 0x34 
+// 0x1234
+```
 

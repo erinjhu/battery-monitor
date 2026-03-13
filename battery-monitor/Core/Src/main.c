@@ -57,16 +57,15 @@ typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 
 /* Private variables ---------------------------------------------------------*/
 
-
 /* Definitions for defaultTask */
-static osThreadId_t defaultTaskHandle;
+osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for xTaskSensor */
-static osThreadId_t xTaskSensorHandle;
+osThreadId_t xTaskSensorHandle;
 uint32_t xTaskSensorBuffer[ 128 ];
 osStaticThreadDef_t xTaskSensorControlBlock;
 const osThreadAttr_t xTaskSensor_attributes = {
@@ -78,7 +77,7 @@ const osThreadAttr_t xTaskSensor_attributes = {
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for xTaskAlarm */
-static osThreadId_t xTaskAlarmHandle;
+osThreadId_t xTaskAlarmHandle;
 uint32_t xTaskAlarmBuffer[ 128 ];
 osStaticThreadDef_t xTaskAlarmControlBlock;
 const osThreadAttr_t xTaskAlarm_attributes = {
@@ -90,7 +89,7 @@ const osThreadAttr_t xTaskAlarm_attributes = {
   .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for xTaskUART */
-static osThreadId_t xTaskUARTHandle;
+osThreadId_t xTaskUARTHandle;
 uint32_t xTaskUARTBuffer[ 128 ];
 osStaticThreadDef_t xTaskUARTControlBlock;
 const osThreadAttr_t xTaskUART_attributes = {
@@ -131,7 +130,7 @@ const osSemaphoreAttr_t xBinSem_attributes = {
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
+void SystemClock_Config(void); 
 
 
 /* USER CODE BEGIN PFP */
@@ -174,6 +173,7 @@ int main(void)
   MX_GPIO_Init();
   MX_ADC1_Init();
   MX_USART2_UART_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
  
   /* USER CODE END 2 */
@@ -309,183 +309,18 @@ void SystemClock_Config(void)
 
 
 
+
+
+
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-// void StartDefaultTask(void *argument)
-// {
-//   /* USER CODE BEGIN 5 */
-//   /* Infinite loop */
-//   for(;;)
-//   {
-//     // if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET) // Button pressed (active low)
-//     // {
-//     //     HAL_UART_Transmit(&huart2, (uint8_t*)"Button pressed\r\n", 30, 100);
-//     //     HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_SET);   // Turn on LED
-//     // }
-//     // else
-//     // {
-//     //     HAL_UART_Transmit(&huart2, (uint8_t*)"Button relesed\r\n", 30, 100);
-//     //     HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET); // Turn off LED
-//     // }
-//     osDelay(1000);
-//   }
-//   /* USER CODE END 5 */
-// }
-
-/* USER CODE BEGIN Header_vTaskVoltageMgr */
-/**
-* @brief Function implementing the xTaskSensor thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_vTaskVoltageMgr */
-// void vTaskVoltageMgr(void *argument)
-// {
-//   /* USER CODE BEGIN vTaskVoltageMgr */
-//   HAL_UART_Transmit(&huart2, (uint8_t*)"Sensor Task Started\r\n", 21, 100);
-//   /* Infinite loop */
-//   osStatus_t errCode;
-//   for(;;)
-//   {
-//     HAL_ADC_Start(&hadc1);
 
 
-//     HAL_StatusTypeDef halStatus = HAL_ADC_PollForConversion(&hadc1,100);
-//     if (halStatus == HAL_TIMEOUT)
-//     {
-//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_ADC_TIMEOUT};
-//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0); // timeout = 0 --> return immediately
-//       continue; // skip the rest of this loop iteration
-//     }
-//     else if (halStatus != HAL_OK) 
-//     {
-//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
-//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
-//       return;
-//     }
 
-//     errCode = osMutexAcquire(xMutexHandle,100);
-//     if (errCode == osErrorTimeout)
-//     {
-//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_MUTEX_TIMEOUT};
-//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
-//       continue; 
-//     }
-//     else if (errCode != osOK) 
-//     {
-//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
-//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
-//       return;
-//     }
 
-//     uint32_t adcRaw = HAL_ADC_GetValue(&hadc1);
-//     fBatteryVoltage = (adcRaw * 3.3f) / 4095.0f;
 
-//     UARTMsg_t batteryMessage = {.type = MSG_TYPE_VOLTAGE, .value = fBatteryVoltage};
-//     osMessageQueuePut(xUARTQueueHandle, &batteryMessage, 0U, 10);
-//     osSemaphoreRelease(xBinSemHandle);
-//     osMutexRelease(xMutexHandle);
-//     osDelay(100);
-//   }
-//   /* USER CODE END vTaskVoltageMgr */
-// }
-
-/* USER CODE BEGIN Header_vTaskAlarm */
-/**
-* @brief Function implementing the xTaskAlarm thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_vTaskAlarm */
-// void vTaskAlarm(void *argument)
-// {
-//   /* USER CODE BEGIN vTaskAlarm */
-//   HAL_UART_Transmit(&huart2, (uint8_t*)"Alarm Task Started\r\n", 21, 100);
-//   osStatus_t errCode;
-//   /* Infinite loop */
-//   for(;;)
-//   {
-    
-//     errCode = osSemaphoreAcquire(xBinSemHandle, HAL_MAX_DELAY);
-//     if (errCode != osOK)
-//     {
-//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
-//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
-//       return;
-//     }
-//     errCode = osMutexAcquire(xMutexHandle,100);
-//     if (errCode != osOK)
-//     {
-//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
-//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
-//       return;
-//     }
-//     float batteryVoltage = fBatteryVoltage;
-//     osMutexRelease(xMutexHandle);
-//     if (batteryVoltage > fThresholdVoltage)
-//     {
-//       HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on green LED\r\n", 30, 100);
-//       HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_SET);
-//       HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_RESET);
-//     } 
-//     else
-//     {
-//       HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on red LED\r\n", 30, 100);
-//       HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_SET);
-//       HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET);
-//     }
-//   }
-//   /* USER CODE END vTaskAlarm */
-// }
-
-/* USER CODE BEGIN Header_vTaskUART */
-/**
-* @brief Function implementing the xTaskUART thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_vTaskUART */
-// void vTaskUART(void *argument)
-// {
-//   /* USER CODE BEGIN vTaskUART */
-//   HAL_UART_Transmit(&huart2, (uint8_t*)"UART Task Started\r\n", 19, 100);
-//   UARTMsg_t msg;
-//   /* Infinite loop */
-//   for(;;)
-//   {
-//     if (osMessageQueueGet(xUARTQueueHandle,&msg,NULL,osWaitForever) == osOK)
-//     // use osWaitForever to block the task until a msg arrives in the queue
-//     {
-//       char buffer[64];
-//       if (msg.type == MSG_TYPE_VOLTAGE)
-//       {
-//         // snprintf(buffer, sizeof(buffer), "Voltage: %u.%02u V\r\n", msg.value);
-//         snprintf(buffer, sizeof(buffer), "Raw: %u\r\n", (unsigned int)(msg.value * 1000));
-//         HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
-//       }
-//       else if (msg.type == MSG_TYPE_ERROR)
-//       {
-//         snprintf(buffer, sizeof(buffer), "Error code: %d \r\n", msg.errCode);
-//         HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
-//       }
-//       else if (msg.type == MSG_TYPE_BUTTON)
-//       {
-//         snprintf(buffer, sizeof(buffer), "Button pressed");
-//         HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
-//       }
-//     }
-//   }
-//   /* USER CODE END vTaskUART */
-// }
 
 /**
   * @brief  Period elapsed callback in non blocking mode

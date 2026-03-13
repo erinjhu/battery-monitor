@@ -1,0 +1,4 @@
+../Core/Src/bmp180.c:10:6:BMP180_Init	8	static
+../Core/Src/bmp180.c:14:6:BMP180_ReadCalibrationData	48	static
+../Core/Src/bmp180.c:32:7:BMP180_GetTemperature	4	static
+../Core/Src/bmp180.c:40:7:BMP180_GetPressure	4	static

@@ -15,6 +15,8 @@ extern volatile uint32_t previousTime;
 extern ADC_HandleTypeDef hadc1;
 // uart
 extern UART_HandleTypeDef huart2;
+// i2c
+extern I2C_HandleTypeDef hi2c1;
 // freertos objects
 extern osMessageQueueId_t xUARTQueueHandle;
 extern osSemaphoreId_t xBinSemHandle;

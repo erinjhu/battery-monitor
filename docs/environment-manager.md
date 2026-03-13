@@ -17,6 +17,8 @@ Address + W/R: `1110111` + `0/1`
 Write: `0xEE`, 
 Read: `0xEF`
 
+Master mode: controller initiates communication
+
 ### Registers
 |Name|Bin|Hex|Description|
 |--|--|--|--|
@@ -43,9 +45,21 @@ Read: `0xEF`
 
 ### Calibration
 
-Every time the STM32 boots up, the calibration data must be read from the EEPROM.
+**EEPROM:** Every time the STM32 boots up, the calibration data must be read from the EEPROM.
 
-**EEPROM:**
 - Electrically erasable programmable read-only memory
 - Retains data when power is lost
 - Non-volatile, byt-addressed
+
+**Purpose of Calibration:** imperfections in sensor
+- An equation translates electrical signals read by the sensor into data
+- The 11 values are the coefficients of that equation
+
+**Steps for Calibration**
+1. Read 11 memory addresses
+    - `0xAA` (10101010) to `0xBF` (10111111)
+    - Each address has a distinct 16-bit calibration coefficient
+    - Since I2C registers are 8 bits, split the 16-bits into MSB and LSB
+    - Read MSB first
+    - Combine the MSB and LSB 
+2. (to-do)

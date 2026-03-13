@@ -21,8 +21,12 @@
 |PA2|USART_Tx|Transmit data from STM32|
 |PA3|USART_Rx|Transmit data to STM32|
 |PC1|ADC1_IN11|Read voltage value|
+|PB6|I2C1_SCL|I2C serial clock|
+|PB7|I2C1_SDA|I2C serial data|
 |3.3V|n/a|Power the potentiometer and LEDs|
 |GND|n/a|Ground|
+
+
 
 **SysTick**
 - Hardware timer
