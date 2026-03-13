@@ -22,7 +22,14 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "app_tasks.h"
+#include "bsp.h"
+#include "globals.h"
+#include "gpio.h"
+#include "interrupts.h"
+#include "messages.h"
+#include "env_mgr.h"
+#include "voltage_mgr.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,64 +44,19 @@ typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-typedef enum
-{
-  MSG_TYPE_VOLTAGE,
-  MSG_TYPE_BUTTON,
-  MSG_TYPE_ERROR
-} MsgType_t;
 
-typedef enum
-{
-  ERR_CODE_SUCCESS = 0,
-  ERR_CODE_UNKNOWN = 1,
-  ERR_CODE_INVALID_ARG = 2,
-  ERR_CODE_QUEUE_FULL = 3,
-  ERR_CODE_MUTEX_TIMEOUT = 4,
-  ERR_CODE_BUFF_TOO_SMALL = 5,
-  ERR_CODE_LOG_MSG_SILENCED = 6,
-  ERR_CODE_INVALID_STATE = 7,
-  ERR_CODE_UNSUPPORTED_EVENT = 8,
-  ERR_CODE_BUFF_OVERFLOW = 9,
-  ERR_CODE_SEMAPHORE_TIMEOUT = 10,
-  ERR_CODE_SEMAPHORE_FULL = 11,
-  ERR_CODE_QUEUE_EMPTY = 12,
-  ERR_CODE_NOT_MUTEX_OWNER = 13,
-  ERR_CODE_PERSISTENT_CORRUPTED = 14,
-  ERR_CODE_FAILED_UNPACK = 15,
-  ERR_CODE_FAILED_PACK = 16,
-  ERR_CODE_INVALID_STATE_TRANSITION = 17,
-  ERR_CODE_FREERTOS_ASSERT_FAIL = 18,
-  ERR_CODE_FAILED_STACK_CANARY = 19,
-  ERR_CODE_ADC_TIMEOUT = 20,
-} ErrorCode_t;
-
-typedef struct 
-{
-  MsgType_t type;  
-  union {
-    float value;  
-    uint8_t str[8];
-    ErrorCode_t errCode;
-  };
-  
-} UARTMsg_t;
 
 
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define GPIO_GREEN_LED GPIO_PIN_5
-#define GPIO_RED_LED GPIO_PIN_6
-#define GPIO_BUTTON GPIO_PIN_13
+
 
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-ADC_HandleTypeDef hadc1;
 
-UART_HandleTypeDef huart2;
 
 /* Definitions for defaultTask */
 static osThreadId_t defaultTaskHandle;
@@ -140,7 +102,6 @@ const osThreadAttr_t xTaskUART_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for xUARTQueue */
-static osMessageQueueId_t xUARTQueueHandle;
 uint8_t xUARTQueueBuffer[ 16 * sizeof( UARTMsg_t ) ];
 osStaticMessageQDef_t xUARTQueueControlBlock;
 const osMessageQueueAttr_t xUARTQueue_attributes = {
@@ -151,7 +112,6 @@ const osMessageQueueAttr_t xUARTQueue_attributes = {
   .mq_size = sizeof(xUARTQueueBuffer)
 };
 /* Definitions for xMutex */
-osMutexId_t xMutexHandle;
 osStaticMutexDef_t xMutexControlBlock;
 const osMutexAttr_t xMutex_attributes = {
   .name = "xMutex",
@@ -159,7 +119,6 @@ const osMutexAttr_t xMutex_attributes = {
   .cb_size = sizeof(xMutexControlBlock),
 };
 /* Definitions for xBinSem */
-osSemaphoreId_t xBinSemHandle;
 osStaticSemaphoreDef_t xBinSemControlBlock;
 const osSemaphoreAttr_t xBinSem_attributes = {
   .name = "xBinSem",
@@ -167,23 +126,13 @@ const osSemaphoreAttr_t xBinSem_attributes = {
   .cb_size = sizeof(xBinSemControlBlock),
 };
 /* USER CODE BEGIN PV */
-volatile float fBatteryVoltage;
-const float fThresholdVoltage = 1.5f;
-// button debouncing
-volatile uint32_t currentTime;
-volatile uint32_t previousTime;
+
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-static void MX_ADC1_Init(void);
-static void MX_USART2_UART_Init(void);
-void StartDefaultTask(void *argument);
-void vTaskSensor(void *argument);
-void vTaskAlarm(void *argument);
-void vTaskUART(void *argument);
+
 
 /* USER CODE BEGIN PFP */
 
@@ -226,8 +175,7 @@ int main(void)
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  uint16_t readVal;
-  char tx_buffer[20];
+ 
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -265,7 +213,7 @@ int main(void)
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of xTaskSensor */
-  xTaskSensorHandle = osThreadNew(vTaskSensor, NULL, &xTaskSensor_attributes);
+  xTaskSensorHandle = osThreadNew(vTaskVoltageMgr, NULL, &xTaskSensor_attributes);
 
   /* creation of xTaskAlarm */
   xTaskAlarmHandle = osThreadNew(vTaskAlarm, NULL, &xTaskAlarm_attributes);
@@ -296,7 +244,8 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
     // code to verify that adc works
-
+  //uint16_t readVal;
+  //char tx_buffer[20];
   //   printf("test print\r\n");
 	//  HAL_ADC_Start(&hadc1);
 	//  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
@@ -355,147 +304,13 @@ void SystemClock_Config(void)
   }
 }
 
-/**
-  * @brief ADC1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_ADC1_Init(void)
-{
 
-  /* USER CODE BEGIN ADC1_Init 0 */
 
-  /* USER CODE END ADC1_Init 0 */
 
-  ADC_ChannelConfTypeDef sConfig = {0};
 
-  /* USER CODE BEGIN ADC1_Init 1 */
-
-  /* USER CODE END ADC1_Init 1 */
-
-  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-  */
-  hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
-  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
-  hadc1.Init.DiscontinuousConvMode = DISABLE;
-  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
-  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-  if (HAL_ADC_Init(&hadc1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
-  sConfig.Channel = ADC_CHANNEL_11;
-  sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN ADC1_Init 2 */
-
-  /* USER CODE END ADC1_Init 2 */
-
-}
-
-/**
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART2_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART2_Init 0 */
-
-  /* USER CODE END USART2_Init 0 */
-
-  /* USER CODE BEGIN USART2_Init 1 */
-
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
-
-  /* USER CODE END USART2_Init 2 */
-
-}
-
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  /* USER CODE BEGIN MX_GPIO_Init_1 */
-
-  /* USER CODE END MX_GPIO_Init_1 */
-
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LD2_Pin|GPIO_PIN_6, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : PC13 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : LD2_Pin PA6 */
-  GPIO_InitStruct.Pin = LD2_Pin|GPIO_PIN_6;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
-
-  /* USER CODE BEGIN MX_GPIO_Init_2 */
-
-  /* USER CODE END MX_GPIO_Init_2 */
-}
 
 /* USER CODE BEGIN 4 */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
-{
-  // HAL_UART_Transmit(&huart2, (uint8_t*)"ISR Started\r\n", 21, 100);
-  currentTime = HAL_GetTick();
-  if (GPIO_PIN == GPIO_BUTTON && (currentTime - previousTime > 5))
-  {
-    //HAL_GPIO_TogglePin(GPIOA, GPIO_GREEN_LED);
-    UARTMsg_t msg = {.type = MSG_TYPE_BUTTON};
-    osMessageQueuePut(xUARTQueueHandle, &msg, 0U, 0);
-    previousTime = currentTime;
-  }
-}
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -505,84 +320,84 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    // if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET) // Button pressed (active low)
-    // {
-    //     HAL_UART_Transmit(&huart2, (uint8_t*)"Button pressed\r\n", 30, 100);
-    //     HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_SET);   // Turn on LED
-    // }
-    // else
-    // {
-    //     HAL_UART_Transmit(&huart2, (uint8_t*)"Button relesed\r\n", 30, 100);
-    //     HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET); // Turn off LED
-    // }
-    osDelay(1000);
-  }
-  /* USER CODE END 5 */
-}
+// void StartDefaultTask(void *argument)
+// {
+//   /* USER CODE BEGIN 5 */
+//   /* Infinite loop */
+//   for(;;)
+//   {
+//     // if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET) // Button pressed (active low)
+//     // {
+//     //     HAL_UART_Transmit(&huart2, (uint8_t*)"Button pressed\r\n", 30, 100);
+//     //     HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_SET);   // Turn on LED
+//     // }
+//     // else
+//     // {
+//     //     HAL_UART_Transmit(&huart2, (uint8_t*)"Button relesed\r\n", 30, 100);
+//     //     HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET); // Turn off LED
+//     // }
+//     osDelay(1000);
+//   }
+//   /* USER CODE END 5 */
+// }
 
-/* USER CODE BEGIN Header_vTaskSensor */
+/* USER CODE BEGIN Header_vTaskVoltageMgr */
 /**
 * @brief Function implementing the xTaskSensor thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_vTaskSensor */
-void vTaskSensor(void *argument)
-{
-  /* USER CODE BEGIN vTaskSensor */
-  HAL_UART_Transmit(&huart2, (uint8_t*)"Sensor Task Started\r\n", 21, 100);
-  /* Infinite loop */
-  osStatus_t errCode;
-  for(;;)
-  {
-    HAL_ADC_Start(&hadc1);
+/* USER CODE END Header_vTaskVoltageMgr */
+// void vTaskVoltageMgr(void *argument)
+// {
+//   /* USER CODE BEGIN vTaskVoltageMgr */
+//   HAL_UART_Transmit(&huart2, (uint8_t*)"Sensor Task Started\r\n", 21, 100);
+//   /* Infinite loop */
+//   osStatus_t errCode;
+//   for(;;)
+//   {
+//     HAL_ADC_Start(&hadc1);
 
 
-    HAL_StatusTypeDef halStatus = HAL_ADC_PollForConversion(&hadc1,100);
-    if (halStatus == HAL_TIMEOUT)
-    {
-      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_ADC_TIMEOUT};
-      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0); // timeout = 0 --> return immediately
-      continue; // skip the rest of this loop iteration
-    }
-    else if (halStatus != HAL_OK) 
-    {
-      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
-      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
-      return;
-    }
+//     HAL_StatusTypeDef halStatus = HAL_ADC_PollForConversion(&hadc1,100);
+//     if (halStatus == HAL_TIMEOUT)
+//     {
+//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_ADC_TIMEOUT};
+//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0); // timeout = 0 --> return immediately
+//       continue; // skip the rest of this loop iteration
+//     }
+//     else if (halStatus != HAL_OK) 
+//     {
+//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
+//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
+//       return;
+//     }
 
-    errCode = osMutexAcquire(xMutexHandle,100);
-    if (errCode == osErrorTimeout)
-    {
-      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_MUTEX_TIMEOUT};
-      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
-      continue; 
-    }
-    else if (errCode != osOK) 
-    {
-      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
-      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
-      return;
-    }
+//     errCode = osMutexAcquire(xMutexHandle,100);
+//     if (errCode == osErrorTimeout)
+//     {
+//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_MUTEX_TIMEOUT};
+//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
+//       continue; 
+//     }
+//     else if (errCode != osOK) 
+//     {
+//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
+//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
+//       return;
+//     }
 
-    uint32_t adcRaw = HAL_ADC_GetValue(&hadc1);
-    fBatteryVoltage = (adcRaw * 3.3f) / 4095.0f;
+//     uint32_t adcRaw = HAL_ADC_GetValue(&hadc1);
+//     fBatteryVoltage = (adcRaw * 3.3f) / 4095.0f;
 
-    UARTMsg_t batteryMessage = {.type = MSG_TYPE_VOLTAGE, .value = fBatteryVoltage};
-    osMessageQueuePut(xUARTQueueHandle, &batteryMessage, 0U, 10);
-    osSemaphoreRelease(xBinSemHandle);
-    osMutexRelease(xMutexHandle);
-    osDelay(100);
-  }
-  /* USER CODE END vTaskSensor */
-}
+//     UARTMsg_t batteryMessage = {.type = MSG_TYPE_VOLTAGE, .value = fBatteryVoltage};
+//     osMessageQueuePut(xUARTQueueHandle, &batteryMessage, 0U, 10);
+//     osSemaphoreRelease(xBinSemHandle);
+//     osMutexRelease(xMutexHandle);
+//     osDelay(100);
+//   }
+//   /* USER CODE END vTaskVoltageMgr */
+// }
 
 /* USER CODE BEGIN Header_vTaskAlarm */
 /**
@@ -591,46 +406,46 @@ void vTaskSensor(void *argument)
 * @retval None
 */
 /* USER CODE END Header_vTaskAlarm */
-void vTaskAlarm(void *argument)
-{
-  /* USER CODE BEGIN vTaskAlarm */
-  HAL_UART_Transmit(&huart2, (uint8_t*)"Alarm Task Started\r\n", 21, 100);
-  osStatus_t errCode;
-  /* Infinite loop */
-  for(;;)
-  {
+// void vTaskAlarm(void *argument)
+// {
+//   /* USER CODE BEGIN vTaskAlarm */
+//   HAL_UART_Transmit(&huart2, (uint8_t*)"Alarm Task Started\r\n", 21, 100);
+//   osStatus_t errCode;
+//   /* Infinite loop */
+//   for(;;)
+//   {
     
-    errCode = osSemaphoreAcquire(xBinSemHandle, HAL_MAX_DELAY);
-    if (errCode != osOK)
-    {
-      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
-      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
-      return;
-    }
-    errCode = osMutexAcquire(xMutexHandle,100);
-    if (errCode != osOK)
-    {
-      UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
-      osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
-      return;
-    }
-    float batteryVoltage = fBatteryVoltage;
-    osMutexRelease(xMutexHandle);
-    if (batteryVoltage > fThresholdVoltage)
-    {
-      HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on green LED\r\n", 30, 100);
-      HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_SET);
-      HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_RESET);
-    } 
-    else
-    {
-      HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on red LED\r\n", 30, 100);
-      HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_SET);
-      HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET);
-    }
-  }
-  /* USER CODE END vTaskAlarm */
-}
+//     errCode = osSemaphoreAcquire(xBinSemHandle, HAL_MAX_DELAY);
+//     if (errCode != osOK)
+//     {
+//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
+//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
+//       return;
+//     }
+//     errCode = osMutexAcquire(xMutexHandle,100);
+//     if (errCode != osOK)
+//     {
+//       UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_UNKNOWN};
+//       osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
+//       return;
+//     }
+//     float batteryVoltage = fBatteryVoltage;
+//     osMutexRelease(xMutexHandle);
+//     if (batteryVoltage > fThresholdVoltage)
+//     {
+//       HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on green LED\r\n", 30, 100);
+//       HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_SET);
+//       HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_RESET);
+//     } 
+//     else
+//     {
+//       HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on red LED\r\n", 30, 100);
+//       HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_SET);
+//       HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET);
+//     }
+//   }
+//   /* USER CODE END vTaskAlarm */
+// }
 
 /* USER CODE BEGIN Header_vTaskUART */
 /**
@@ -639,38 +454,38 @@ void vTaskAlarm(void *argument)
 * @retval None
 */
 /* USER CODE END Header_vTaskUART */
-void vTaskUART(void *argument)
-{
-  /* USER CODE BEGIN vTaskUART */
-  HAL_UART_Transmit(&huart2, (uint8_t*)"UART Task Started\r\n", 19, 100);
-  UARTMsg_t msg;
-  /* Infinite loop */
-  for(;;)
-  {
-    if (osMessageQueueGet(xUARTQueueHandle,&msg,NULL,osWaitForever) == osOK)
-    // use osWaitForever to block the task until a msg arrives in the queue
-    {
-      char buffer[64];
-      if (msg.type == MSG_TYPE_VOLTAGE)
-      {
-        // snprintf(buffer, sizeof(buffer), "Voltage: %u.%02u V\r\n", msg.value);
-        snprintf(buffer, sizeof(buffer), "Raw: %u\r\n", (unsigned int)(msg.value * 1000));
-        HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
-      }
-      else if (msg.type == MSG_TYPE_ERROR)
-      {
-        snprintf(buffer, sizeof(buffer), "Error code: %d \r\n", msg.errCode);
-        HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
-      }
-      else if (msg.type == MSG_TYPE_BUTTON)
-      {
-        snprintf(buffer, sizeof(buffer), "Button pressed");
-        HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
-      }
-    }
-  }
-  /* USER CODE END vTaskUART */
-}
+// void vTaskUART(void *argument)
+// {
+//   /* USER CODE BEGIN vTaskUART */
+//   HAL_UART_Transmit(&huart2, (uint8_t*)"UART Task Started\r\n", 19, 100);
+//   UARTMsg_t msg;
+//   /* Infinite loop */
+//   for(;;)
+//   {
+//     if (osMessageQueueGet(xUARTQueueHandle,&msg,NULL,osWaitForever) == osOK)
+//     // use osWaitForever to block the task until a msg arrives in the queue
+//     {
+//       char buffer[64];
+//       if (msg.type == MSG_TYPE_VOLTAGE)
+//       {
+//         // snprintf(buffer, sizeof(buffer), "Voltage: %u.%02u V\r\n", msg.value);
+//         snprintf(buffer, sizeof(buffer), "Raw: %u\r\n", (unsigned int)(msg.value * 1000));
+//         HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
+//       }
+//       else if (msg.type == MSG_TYPE_ERROR)
+//       {
+//         snprintf(buffer, sizeof(buffer), "Error code: %d \r\n", msg.errCode);
+//         HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
+//       }
+//       else if (msg.type == MSG_TYPE_BUTTON)
+//       {
+//         snprintf(buffer, sizeof(buffer), "Button pressed");
+//         HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100);
+//       }
+//     }
+//   }
+//   /* USER CODE END vTaskUART */
+// }
 
 /**
   * @brief  Period elapsed callback in non blocking mode

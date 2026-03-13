@@ -1,12 +1,4 @@
-../Core/Src/main.c:201:5:main	32	static
-../Core/Src/main.c:316:6:SystemClock_Config	88	static
-../Core/Src/main.c:363:13:MX_ADC1_Init	24	static
-../Core/Src/main.c:415:13:MX_USART2_UART_Init	8	static
-../Core/Src/main.c:448:13:MX_GPIO_Init	48	static
-../Core/Src/main.c:487:6:HAL_GPIO_EXTI_Callback	32	static
-../Core/Src/main.c:508:6:StartDefaultTask	16	static
-../Core/Src/main.c:536:6:vTaskSensor	88	static
-../Core/Src/main.c:594:6:vTaskAlarm	48	static
-../Core/Src/main.c:642:6:vTaskUART	96	static
-../Core/Src/main.c:683:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/main.c:701:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:150:5:main	8	static
+../Core/Src/main.c:265:6:SystemClock_Config	88	static
+../Core/Src/main.c:498:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:516:6:Error_Handler	4	static,ignoring_inline_asm

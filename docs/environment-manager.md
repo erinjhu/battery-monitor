@@ -39,4 +39,13 @@ Read: `0xEF`
 
 ### Hardware
 
-- Pull-up resistors for SCL and SDA: 4.7 kOhm
+- Pull-up resistors for SCL and SDA: 4.7 
+
+### Calibration
+
+Every time the STM32 boots up, the calibration data must be read from the EEPROM.
+
+**EEPROM:**
+- Electrically erasable programmable read-only memory
+- Retains data when power is lost
+- Non-volatile, byt-addressed

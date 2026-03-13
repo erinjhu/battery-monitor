@@ -1,0 +1,3 @@
+../Core/Src/app_tasks.c:8:6:StartDefaultTask	16	static
+../Core/Src/app_tasks.c:16:6:vTaskUART	96	static
+../Core/Src/app_tasks.c:49:6:vTaskAlarm	48	static

@@ -1,0 +1,3 @@
+../Core/Src/bsp.c:9:6:MX_GPIO_Init	48	static
+../Core/Src/bsp.c:52:6:MX_ADC1_Init	24	static
+../Core/Src/bsp.c:105:6:MX_USART2_UART_Init	8	static
