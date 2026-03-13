@@ -1,5 +1,6 @@
 #include "bmp180.h"
 #include "globals.h"
+#include "messages.h"
 
 
 
@@ -8,13 +9,27 @@
 BMP180_CalibData_t calib_data;
 
 void BMP180_Init(void) {
-    BMP180_ReadCalibrationData();
+    uint8_t chip_id = 0;
+    HAL_I2C_Mem_Read(&hi2c1, BMP180_I2C_DEVICE_ADDR, 0xD0, I2C_MEMADD_SIZE_8BIT, &chip_id, 1, 100);    
+    if (chip_id == 0x55) {
+        BMP180_ReadCalibrationData();
+    }
+    else
+    {
+    	chip_id = 0xA;
+    }
 }
 
 void BMP180_ReadCalibrationData(void) {
     // Read from I2C
     uint8_t calib_raw[22];
-    HAL_I2C_Mem_Read(&hi2c1, BMP180_I2C_DEVICE_ADDR, BMP180_REG_AC1_MSB, I2C_MEMADD_SIZE_8BIT, &calib_raw, 22, 100);
+    HAL_StatusTypeDef status = HAL_I2C_Mem_Read(&hi2c1, BMP180_I2C_DEVICE_ADDR, BMP180_REG_AC1_MSB, I2C_MEMADD_SIZE_8BIT, calib_raw, 22, 100);
+    if (status != HAL_OK)
+    {
+        UARTMsg_t errMsg = {.type = MSG_TYPE_ERROR, .errCode = ERR_CODE_I2C};
+        osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
+        return;
+    }
     // Combine the bytes and put them into the struct
     calib_data.ac1 = (int16_t)((calib_raw[0] << 8) | calib_raw[1]);
     calib_data.ac2 = (int16_t)((calib_raw[2] << 8) | calib_raw[3]);

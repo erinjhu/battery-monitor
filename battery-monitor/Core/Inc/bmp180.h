@@ -27,9 +27,15 @@
 #define BMP180_REG_MD_MSB   0xBE
 #define BMP180_REG_MD_LSB   0xBF
 
+// Control register
+#define BMP180_REG_CONTROl      0xF4
+#define BMP180_TEMP_CMD         0x2E
+#define BMP180_OSS              0x1
+#define BMP180_PRESSURE_CMD     (0x34 + (BMP180_OSS << 6))
+
 // I2C addresses
 #define BMP180_I2C_READ_ADDR 0xEF
-#define BMP180_I2C_WRITE_ADDR 0xEF
+#define BMP180_I2C_WRITE_ADDR 0xEE
 #define BMP180_I2C_DEVICE_ADDR 0xEE
 
 // Struct to hold the 11 calibration variables

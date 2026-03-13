@@ -63,3 +63,27 @@ Master mode: controller initiates communication
     - Read MSB first
     - Combine the MSB and LSB 
 2. (to-do)
+
+
+### Oversampling Setting (OSS)
+
+Write `OSS << 6` into the control register
+
+OSS controls the accuracy and noise level.
+
+|Higher OSS|Lower OSS|
+|--|--|
+|Sensor takes more samples and averages them|Sensor takes fewer samples and averages them|
+|Higher accuracy|Lower accuracy|
+|Less noise|More noise|
+|Longer measurement time|Shorter measurement time|
+
+Bits 7 and 6 of the control register are for the oversampling setting.
+- If OSS = 0: 0 << 6 = 0 (bits 7 and 6 are 00)
+- If OSS = 1: 1 << 6 = 64 (bits 7 and 6 are 01)
+- If OSS = 2: 2 << 6 = 128 (bits 7 and 6 are 10)
+- If OSS = 3: 3 << 6 = 192 (bits 7 and 6 are 11)
+
+Only pressure (not temperature) has OSS.
+- Sensor hardware designed for single temperature reading, so there isn't an option for oversampling or averaging.
+- Temperature is less sensitive to noise.

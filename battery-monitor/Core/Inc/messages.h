@@ -32,6 +32,7 @@ typedef enum
   ERR_CODE_FREERTOS_ASSERT_FAIL = 18,
   ERR_CODE_FAILED_STACK_CANARY = 19,
   ERR_CODE_ADC_TIMEOUT = 20,
+  ERR_CODE_I2C = 20,
 } ErrorCode_t;
 
 typedef struct 
