@@ -38,6 +38,11 @@
 #define BMP180_I2C_WRITE_ADDR 0xEE
 #define BMP180_I2C_DEVICE_ADDR 0xEE
 
+// Temperature register
+#define BMP180_REG_TEMP_MSB 0xF6
+#define BMP180_REG_TEMP_LSB 0xF7
+
+
 // Struct to hold the 11 calibration variables
 typedef struct {
     int16_t  ac1;

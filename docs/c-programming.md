@@ -48,3 +48,10 @@ value = (0x12 << 8) | 0x34;
 // 0x1234
 ```
 
+## Data Types
+
+|Type|Bits|Description
+|--|--|--|
+|float|32|decimals, NaN, inf. IEEE 754|
+|double|64|decimals, NaN, inf. IEEE 754|
+|int[x]_t|x|whole numbers|

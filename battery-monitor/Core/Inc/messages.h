@@ -32,7 +32,10 @@ typedef enum
   ERR_CODE_FREERTOS_ASSERT_FAIL = 18,
   ERR_CODE_FAILED_STACK_CANARY = 19,
   ERR_CODE_ADC_TIMEOUT = 20,
-  ERR_CODE_I2C = 20,
+  ERR_CODE_I2C_MEM_READ = 21,
+  ERR_CODE_I2C_MEM_WRITE = 22;
+  ERR_CODE_FAILED_BMP180_INIT = 23;
+  ERR_CODE_FAILED_BMP180_CALIB = 24;
 } ErrorCode_t;
 
 typedef struct 
@@ -43,8 +46,19 @@ typedef struct
     uint8_t str[8];
     ErrorCode_t errCode;
   };
-  
+  const char *file;
+  const char *func;
+  int line;
 } UARTMsg_t;
 
+#define REPORT_ERROR(errCode) report_error((errCode), __FILE__, __func__, __LINE__)
+#define RETURN_IF_ERROR_CODE(_ret)         \
+ do {                                      \
+    errCode = _ret;                        \
+    if (errCode != HAL_OK) { \
+      REPORT_ERROR(errCode);               \
+      return errCode;                      \
+    }                                      \
+  } while (0)
 
 #endif // MESSAGES_H
