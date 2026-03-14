@@ -19,8 +19,8 @@ extern UART_HandleTypeDef huart2;
 extern I2C_HandleTypeDef hi2c1;
 // freertos objects
 extern osMessageQueueId_t xUARTQueueHandle;
-extern osSemaphoreId_t xBinSemHandle;
+// extern osSemaphoreId_t xBinSemHandle;
 extern osMutexId_t xMutexHandle;
-
+extern osThreadId_t xTaskAlarm;
 
 #endif // GLOBALS_H

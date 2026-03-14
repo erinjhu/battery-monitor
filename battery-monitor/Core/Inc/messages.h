@@ -55,7 +55,7 @@ typedef struct
 #define RETURN_IF_ERROR_CODE(_ret)         \
  do {                                      \
     errCode = _ret;                        \
-    if (errCode != HAL_OK) { \
+    if (errCode != osOK && errCode != HAL_OK) { \
       REPORT_ERROR(errCode);               \
       return errCode;                      \
     }                                      \

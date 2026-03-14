@@ -1,7 +1,6 @@
 #include "bmp180.h"
 #include "globals.h"
 #include "messages.h"
-#include <math.h>
 
 
 
@@ -25,7 +24,7 @@ void BMP180_Init(void) {
     }
 }
 
-void BMP180_ReadCalibrationData(void) {
+static void BMP180_ReadCalibrationData(void) {
     // Read from I2C
     uint8_t calib_raw[22];
     HAL_StatusTypeDef errCode;

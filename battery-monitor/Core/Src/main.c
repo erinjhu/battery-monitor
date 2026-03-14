@@ -77,7 +77,7 @@ const osThreadAttr_t xTaskSensor_attributes = {
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for xTaskAlarm */
-osThreadId_t xTaskAlarmHandle;
+// osThreadId_t xTaskAlarmHandle;
 uint32_t xTaskAlarmBuffer[ 128 ];
 osStaticThreadDef_t xTaskAlarmControlBlock;
 const osThreadAttr_t xTaskAlarm_attributes = {
@@ -190,7 +190,7 @@ int main(void)
 
   /* Create the semaphores(s) */
   /* creation of xBinSem */
-  xBinSemHandle = osSemaphoreNew(1, 0, &xBinSem_attributes);
+  //xBinSemHandle = osSemaphoreNew(1, 0, &xBinSem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
