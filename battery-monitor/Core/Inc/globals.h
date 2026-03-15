@@ -7,6 +7,8 @@
 
 // variables
 extern volatile float fBatteryVoltage;
+extern volatile float fBatteryTemperature;
+extern volatile float fBatteryPressure;
 extern const float fThresholdVoltage;
 // button debouncing
 extern volatile uint32_t currentTime;

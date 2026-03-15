@@ -5,6 +5,8 @@
 typedef enum
 {
   MSG_TYPE_VOLTAGE,
+  MSG_TYPE_TEMP,
+  MSG_TYPE_PRESSURE,
   MSG_TYPE_BUTTON,
   MSG_TYPE_ERROR
 } MsgType_t;

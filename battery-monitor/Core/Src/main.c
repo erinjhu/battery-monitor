@@ -175,7 +175,6 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  BMP180_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
