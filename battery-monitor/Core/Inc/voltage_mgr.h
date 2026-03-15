@@ -3,4 +3,7 @@
 
 void vTaskVoltageMgr(void *argument);
 
+extern osThreadId_t xTaskSensorHandle;
+
+
 #endif // VOLTAGE_MGR_H

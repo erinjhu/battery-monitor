@@ -5,6 +5,8 @@
 #include "gpio.h"
 #include "messages.h"
 
+
+
 void StartDefaultTask(void *argument)
 {
     for(;;)
@@ -12,6 +14,32 @@ void StartDefaultTask(void *argument)
         osDelay(1000);
     }
 }
+
+
+
+osThreadId_t xTaskAlarmHandle;
+uint32_t xTaskAlarmBuffer[ 128 ];
+osStaticThreadDef_t xTaskAlarmControlBlock;
+const osThreadAttr_t xTaskAlarm_attributes = {
+  .name = "xTaskAlarm",
+  .cb_mem = &xTaskAlarmControlBlock,
+  .cb_size = sizeof(xTaskAlarmControlBlock),
+  .stack_mem = &xTaskAlarmBuffer[0],
+  .stack_size = sizeof(xTaskAlarmBuffer),
+  .priority = (osPriority_t) osPriorityHigh,
+};
+
+osThreadId_t xTaskUARTHandle;
+uint32_t xTaskUARTBuffer[ 128 ];
+osStaticThreadDef_t xTaskUARTControlBlock;
+const osThreadAttr_t xTaskUART_attributes = {
+  .name = "xTaskUART",
+  .cb_mem = &xTaskUARTControlBlock,
+  .cb_size = sizeof(xTaskUARTControlBlock),
+  .stack_mem = &xTaskUARTBuffer[0],
+  .stack_size = sizeof(xTaskUARTBuffer),
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 void vTaskUART(void *argument)
 {

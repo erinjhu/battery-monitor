@@ -6,6 +6,17 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+uint32_t xTaskSensorBuffer[ 128 ];
+osStaticThreadDef_t xTaskSensorControlBlock;
+const osThreadAttr_t xTaskSensor_attributes = {
+  .name = "xTaskSensor",
+  .cb_mem = &xTaskSensorControlBlock,
+  .cb_size = sizeof(xTaskSensorControlBlock),
+  .stack_mem = &xTaskSensorBuffer[0],
+  .stack_size = sizeof(xTaskSensorBuffer),
+  .priority = (osPriority_t) osPriorityLow,
+};
+
 void vTaskVoltageMgr(void *argument)
 {
   /* USER CODE BEGIN vTaskVoltageMgr */

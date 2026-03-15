@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    gpio.h
+  * @file    iwdg.h
   * @brief   This file contains all the function prototypes for
-  *          the gpio.c file
+  *          the iwdg.c file
   ******************************************************************************
   * @attention
   *
@@ -18,8 +18,8 @@
   */
 /* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __GPIO_H__
-#define __GPIO_H__
+#ifndef __IWDG_H__
+#define __IWDG_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,14 +29,28 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
+#include "stm32f4xx_hal.h"
 
 /* USER CODE END Includes */
 
+extern IWDG_HandleTypeDef hiwdg;
+
 /* USER CODE BEGIN Private defines */
+typedef enum {
+    HEALTH_OK,
+    HEALTH_WARNING,
+    HEALTH_ERROR
+} HealthFlag_t;
+
+typedef struct {
+    HealthFlag_t battery;
+    HealthFlag_t sensor;
+    HealthFlag_t comms;
+} SystemHealth_t;
 
 /* USER CODE END Private defines */
 
-void MX_GPIO_Init(void);
+void MX_IWDG_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
@@ -45,5 +59,6 @@ void MX_GPIO_Init(void);
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ GPIO_H__ */
+
+#endif /* __IWDG_H__ */
 
