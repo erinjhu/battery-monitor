@@ -8,6 +8,7 @@ typedef enum
   MSG_TYPE_TEMP,
   MSG_TYPE_PRESSURE,
   MSG_TYPE_BUTTON,
+  MSG_TYPE_HEALTH,
   MSG_TYPE_ERROR
 } MsgType_t;
 
@@ -38,6 +39,7 @@ typedef enum
   ERR_CODE_I2C_MEM_WRITE = 22;
   ERR_CODE_FAILED_BMP180_INIT = 23;
   ERR_CODE_FAILED_BMP180_CALIB = 24;
+  ERR_CODE_WATCHDOG_HEALTHY = 25;
 } ErrorCode_t;
 
 typedef struct 
@@ -51,7 +53,10 @@ typedef struct
   const char *file;
   const char *func;
   int line;
+  char msg[64];
 } UARTMsg_t;
+
+#define LOG_FROM_TASK logMsgFromTask((errCode), (type), __FILE__, __func__, __LINE__, msg)
 
 #define REPORT_ERROR(errCode) report_error((errCode), __FILE__, __func__, __LINE__)
 #define RETURN_IF_ERROR_CODE(_ret)         \

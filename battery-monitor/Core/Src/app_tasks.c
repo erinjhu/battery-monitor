@@ -17,17 +17,7 @@ void StartDefaultTask(void *argument)
 
 
 
-osThreadId_t xTaskAlarmHandle;
-uint32_t xTaskAlarmBuffer[ 128 ];
-osStaticThreadDef_t xTaskAlarmControlBlock;
-const osThreadAttr_t xTaskAlarm_attributes = {
-  .name = "xTaskAlarm",
-  .cb_mem = &xTaskAlarmControlBlock,
-  .cb_size = sizeof(xTaskAlarmControlBlock),
-  .stack_mem = &xTaskAlarmBuffer[0],
-  .stack_size = sizeof(xTaskAlarmBuffer),
-  .priority = (osPriority_t) osPriorityHigh,
-};
+
 
 osThreadId_t xTaskUARTHandle;
 uint32_t xTaskUARTBuffer[ 128 ];
@@ -73,6 +63,18 @@ void vTaskUART(void *argument)
   /* USER CODE END vTaskUART */
 }
 
+osThreadId_t xTaskAlarmHandle;
+uint32_t xTaskAlarmBuffer[ 128 ];
+osStaticThreadDef_t xTaskAlarmControlBlock;
+const osThreadAttr_t xTaskAlarm_attributes = {
+  .name = "xTaskAlarm",
+  .cb_mem = &xTaskAlarmControlBlock,
+  .cb_size = sizeof(xTaskAlarmControlBlock),
+  .stack_mem = &xTaskAlarmBuffer[0],
+  .stack_size = sizeof(xTaskAlarmBuffer),
+  .priority = (osPriority_t) osPriorityHigh,
+};
+
 void vTaskAlarm(void *argument)
 {
   /* USER CODE BEGIN vTaskAlarm */
@@ -100,4 +102,67 @@ void vTaskAlarm(void *argument)
     }
   }
   /* USER CODE END vTaskAlarm */
+}
+
+
+void vTaskUART(void *argument)
+{
+  /* USER CODE BEGIN vTaskUART */
+  osStatus_t errCode;
+  RETURN_IF_ERROR_CODE(HAL_UART_Transmit(&huart2, (uint8_t*)"UART Task Started\r\n", 19, 100));
+  UARTMsg_t msg;
+  /* Infinite loop */
+  for(;;)
+  {
+    RETURN_IF_ERROR_CODE(osMessageQueueGet(xUARTQueueHandle, &msg, NULL, osWaitForever));
+    // use osWaitForever to block the task until a msg arrives in the queue  
+    char buffer[64];
+    if (msg.type == MSG_TYPE_VOLTAGE)
+    {
+      // snprintf(buffer, sizeof(buffer), "Voltage: %u.%02u V\r\n", msg.value);
+      snprintf(buffer, sizeof(buffer), "Raw: %u\r\n", (unsigned int)(msg.value * 1000));
+      RETURN_IF_ERROR_CODE(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100));
+    }
+    else if (msg.type == MSG_TYPE_ERROR)
+    {
+      snprintf(buffer, sizeof(buffer), "Error code: %d \r\n", msg.errCode);
+      RETURN_IF_ERROR_CODE(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100));
+    }
+    else if (msg.type == MSG_TYPE_BUTTON)
+    {
+      snprintf(buffer, sizeof(buffer), "Button pressed");
+      RETURN_IF_ERROR_CODE(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100));
+    }
+  }
+  /* USER CODE END vTaskUART */
+}
+
+osThreadId_t xTaskWatchdog;
+uint32_t xTaskWatchdogBuffer[ 128 ];
+osStaticThreadDef_t xTaskWatchdogControlBlock;
+const osThreadAttr_t xTaskWatchdog_attributes = {
+  .name = "xTaskWatchdog",
+  .cb_mem = &xTaskWatchdogControlBlock,
+  .cb_size = sizeof(xTaskWatchdogControlBlock),
+  .stack_mem = &xTaskWatchdogBuffer[0],
+  .stack_size = sizeof(xTaskWatchdogBuffer),
+  .priority = (osPriority_t) osPriorityHigh,
+};
+
+void vTaskWatchdog(void *argument)
+{
+  /* USER CODE BEGIN vTaskUART */
+  osStatus_t errCode;
+  RETURN_IF_ERROR_CODE(HAL_UART_Transmit(&huart2, (uint8_t*)"Watchdog Task Started\r\n", 19, 100));
+  UARTMsg_t msg;
+  /* Infinite loop */
+  for(;;)
+  {
+    if (healthFlags.battery == HEALTH_OK && healthFlags.sensor && HEALTH_OK || healthFlags && HEALTH_OK)
+    {
+      LOG_FROM_TASK(ERR_CODE_WATCHDOG_HEALTHY, MSG_TYPE_HEALTH, "watchdog healthy");
+      RETURN_IF_ERROR_CODE(HAL_IWDG_Refresh(&hiwdg));
+    }
+    osDelay(50);
+  }
 }

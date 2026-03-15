@@ -4,6 +4,7 @@
 
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
+#include "iwdg.h"
 
 // variables
 extern volatile float fBatteryVoltage;
@@ -17,8 +18,8 @@ extern volatile uint32_t previousTime;
 extern osMessageQueueId_t xUARTQueueHandle;
 // extern osSemaphoreId_t xBinSemHandle;
 extern osMutexId_t xMutexHandle;
-extern osThreadId_t xTaskAlarm;
-
+// health flags
+extern SystemHealth_t healthFlags;
 
 
 #endif // GLOBALS_H

@@ -6,4 +6,9 @@ void report_error(ErrorCode_t errCode, const char *file, const char *func, int l
     osMessageQueuePut(xUARTQueueHandle, &errMsg, 0U, 0);
 }
 
+void logMsgFromTask(ErrorCode_t errCode, MsgType_t type, const char *file, const char *func, int line, const char *msg) {
+    UARTMsg_t logMsg = {.type = type, .errCode = errCode, .file = file, .func = func, .line = line};
+    strncpy(logMsg.msg, msg, sizeof(logMsg.msg)-1);
+    osMessageQueuePut(xUARTQueueHandle, &logMsg, 0U, 0);
 
+}
