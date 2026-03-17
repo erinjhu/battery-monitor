@@ -3,6 +3,7 @@
 #include "gpio.h"
 #include "messages.h"
 #include "cmsis_os.h"
+#include "iwdg.h"
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
@@ -13,7 +14,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
   {
     //HAL_GPIO_TogglePin(GPIOA, GPIO_GREEN_LED);
     UARTMsg_t msg = {.type = MSG_TYPE_BUTTON};
-    osMessageQueuePut(xUARTQueueHandle, &msg, 0U, 0);
+    RETURN_IF_ERROR_CODE_HEALTH((xUARTQueueHandle, &msg, 0U, 0), &healthFlags.button);
     previousTime = currentTime;
+    healthFlags.button = HEALTH_OK;
   }
 }

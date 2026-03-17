@@ -43,9 +43,11 @@ typedef enum {
 } HealthFlag_t;
 
 typedef struct {
-    HealthFlag_t battery;
-    HealthFlag_t sensor;
-    HealthFlag_t comms;
+    HealthFlag_t voltage_mgr;
+    HealthFlag_t env_mgr;
+    HealthFlag_t uart;
+    HealthFlag_t alarm;
+    HealthFlag_t button;
 } SystemHealth_t;
 
 /* USER CODE END Private defines */

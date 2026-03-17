@@ -58,7 +58,7 @@ typedef struct
 
 #define LOG_FROM_TASK logMsgFromTask((errCode), (type), __FILE__, __func__, __LINE__, msg)
 
-#define REPORT_ERROR(errCode) report_error((errCode), __FILE__, __func__, __LINE__)
+#define REPORT_ERROR(errCode, _healthFlag) report_error((errCode), __FILE__, __func__, __LINE__)
 #define RETURN_IF_ERROR_CODE(_ret)         \
  do {                                      \
     errCode = _ret;                        \
@@ -67,5 +67,13 @@ typedef struct
       return errCode;                      \
     }                                      \
   } while (0)
-
+#define RETURN_IF_ERROR_CODE_HEALTH(_ret, _healthFlag) \
+  do { \
+    errCode = _ret; \
+    if (errCode != osOK && errCode != HAL_OK) { \
+      *_healthFlag = HEALTH_UNHEALTHY; /* or your error code */ \
+      REPORT_ERROR(errCode); \
+      return errCode; \
+    } \
+  } while (0)
 #endif // MESSAGES_H

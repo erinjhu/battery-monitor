@@ -5,6 +5,7 @@
 #include "messages.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "iwdg.h"
 
 uint32_t xTaskSensorBuffer[ 128 ];
 osStaticThreadDef_t xTaskSensorControlBlock;
@@ -27,16 +28,17 @@ void vTaskVoltageMgr(void *argument)
   {
     HAL_ADC_Start(&hadc1);
 
-    RETURN_IF_ERROR_CODE(HAL_ADC_PollForConversion(&hadc1,100));
-    RETURN_IF_ERROR_CODE(osMutexAcquire(xMutexHandle,100));
+    RETURN_IF_ERROR_CODE_HEALTH(HAL_ADC_PollForConversion(&hadc1,100), &healthFlags.voltage_mgr);
+    RETURN_IF_ERROR_CODE_HEALTH(osMutexAcquire(xMutexHandle,100), &healthFlags.voltage_mgr);
 
     uint32_t adcRaw = HAL_ADC_GetValue(&hadc1);
     fBatteryVoltage = (adcRaw * 3.3f) / 4095.0f;
     UARTMsg_t batteryMessage = {.type = MSG_TYPE_VOLTAGE, .value = fBatteryVoltage};
-    RETURN_IF_ERROR_CODE(osMessageQueuePut(xUARTQueueHandle, &batteryMessage, 0U, 10));
+    RETURN_IF_ERROR_CODE_HEALTH(osMessageQueuePut(xUARTQueueHandle, &batteryMessage, 0U, 10), &healthFlags.voltage_mgr);
     // osSemaphoreRelease(xBinSemHandle);
     xTaskNotifyGive(xTaskAlarm);
-    RETURN_IF_ERROR_CODE(osMutexRelease(xMutexHandle));
+    RETURN_IF_ERROR_CODE_HEALTH(osMutexRelease(xMutexHandle), &healthFlags.voltage_mgr);
+    healthFlags.voltage_mgr = HEALTH_OK;
     osDelay(100);
   }
   /* USER CODE END vTaskVoltageMgr */
