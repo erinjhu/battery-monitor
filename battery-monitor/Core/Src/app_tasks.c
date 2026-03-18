@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "gpio.h"
 #include "messages.h"
+#include "usart.h"
 
 
 
@@ -36,29 +37,29 @@ void vTaskUART(void *argument)
   /* USER CODE BEGIN vTaskUART */
   
   osStatus_t errCode;
-  RETURN_IF_ERROR_CODE(HAL_UART_Transmit(&huart2, (uint8_t*)"UART Task Started\r\n", 19, 100));
+  RETURN_IF_ERROR_CODE_HEALTH(HAL_UART_Transmit(&huart2, (uint8_t*)"UART Task Started\r\n", 19, 100), &healthFlags.uart);
   UARTMsg_t msg;
   /* Infinite loop */
   for(;;)
   {
-    RETURN_IF_ERROR_CODE(osMessageQueueGet(xUARTQueueHandle, &msg, NULL, osWaitForever));
+    RETURN_IF_ERROR_CODE_HEALTH(osMessageQueueGet(xUARTQueueHandle, &msg, NULL, osWaitForever), &healthFlags.uart);
     // use osWaitForever to block the task until a msg arrives in the queue  
     char buffer[64];
     if (msg.type == MSG_TYPE_VOLTAGE)
     {
       // snprintf(buffer, sizeof(buffer), "Voltage: %u.%02u V\r\n", msg.value);
       snprintf(buffer, sizeof(buffer), "Raw: %u\r\n", (unsigned int)(msg.value * 1000));
-      RETURN_IF_ERROR_CODE(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100));
+      RETURN_IF_ERROR_CODE_HEALTH(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100), &healthFlags.uart);
     }
     else if (msg.type == MSG_TYPE_ERROR)
     {
       snprintf(buffer, sizeof(buffer), "Error code: %d \r\n", msg.errCode);
-      RETURN_IF_ERROR_CODE(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100));
+      RETURN_IF_ERROR_CODE_HEALTH(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100), &healthFlags.uart);
     }
     else if (msg.type == MSG_TYPE_BUTTON)
     {
       snprintf(buffer, sizeof(buffer), "Button pressed");
-      RETURN_IF_ERROR_CODE(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100));
+      RETURN_IF_ERROR_CODE_HEALTH(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100), &healthFlags.uart);
     }
     healthFlags.uart = HEALTH_OK;
   }
@@ -124,12 +125,13 @@ void vTaskWatchdog(void *argument)
 {
   /* USER CODE BEGIN vTaskUART */
   osStatus_t errCode;
+  MsgType_t type;
   RETURN_IF_ERROR_CODE(HAL_UART_Transmit(&huart2, (uint8_t*)"Watchdog Task Started\r\n", 19, 100));
   UARTMsg_t msg;
   /* Infinite loop */
   for(;;)
   {
-    if (healthFlags.battery == HEALTH_OK && healthFlags.sensor && HEALTH_OK || healthFlags && HEALTH_OK)
+    if (healthFlags.uart == HEALTH_OK && healthFlags.alarm == HEALTH_OK && healthFlags.bmp180 == HEALTH_OK && healthFlags.button == HEALTH_OK && healthFlags.env_mgr == HEALTH_OK && healthFlags.voltage_mgr == HEALTH_OK)
     {
       LOG_FROM_TASK(ERR_CODE_WATCHDOG_HEALTHY, MSG_TYPE_HEALTH, "watchdog healthy");
       RETURN_IF_ERROR_CODE(HAL_IWDG_Refresh(&hiwdg));

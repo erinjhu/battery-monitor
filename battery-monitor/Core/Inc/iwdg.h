@@ -48,6 +48,7 @@ typedef struct {
     HealthFlag_t uart;
     HealthFlag_t alarm;
     HealthFlag_t button;
+    HealthFlag_t bmp180;
 } SystemHealth_t;
 
 /* USER CODE END Private defines */

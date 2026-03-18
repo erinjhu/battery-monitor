@@ -1,0 +1,2 @@
+../Core/Src/messages.c:4:6:report_error	1
+../Core/Src/messages.c:9:6:logMsgFromTask	1

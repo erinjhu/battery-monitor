@@ -1,6 +1,7 @@
 #ifndef MESSAGES_H
 #define MESSAGES_H
 
+#include <stdint.h>
 
 typedef enum
 {
@@ -36,10 +37,10 @@ typedef enum
   ERR_CODE_FAILED_STACK_CANARY = 19,
   ERR_CODE_ADC_TIMEOUT = 20,
   ERR_CODE_I2C_MEM_READ = 21,
-  ERR_CODE_I2C_MEM_WRITE = 22;
-  ERR_CODE_FAILED_BMP180_INIT = 23;
-  ERR_CODE_FAILED_BMP180_CALIB = 24;
-  ERR_CODE_WATCHDOG_HEALTHY = 25;
+  ERR_CODE_I2C_MEM_WRITE = 22,
+  ERR_CODE_FAILED_BMP180_INIT = 23,
+  ERR_CODE_FAILED_BMP180_CALIB = 24,
+  ERR_CODE_WATCHDOG_HEALTHY = 25,
 } ErrorCode_t;
 
 typedef struct 
@@ -71,7 +72,7 @@ typedef struct
   do { \
     errCode = _ret; \
     if (errCode != osOK && errCode != HAL_OK) { \
-      *_healthFlag = HEALTH_UNHEALTHY; /* or your error code */ \
+      *_healthFlag = HEALTH_ERROR; /* or your error code */ \
       REPORT_ERROR(errCode); \
       return errCode; \
     } \

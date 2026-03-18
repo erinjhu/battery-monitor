@@ -13,6 +13,8 @@ Embedded STM32 project for monitoring battery voltage, controlling LEDs, and com
 - [Environment Manager](docs/environment-manager.md)
 - [Peripherals](docs/peripherals.md)
 - [Interrupts](docs/interrupts.md)
+- [Watchdog](docs/watchdog.md)
+- [C Programming](docs/c-programming.md)
 
 ## Project Overview
 This project monitors battery voltage using an STM32 microcontroller, displays status with LEDs, and transmits data over UART. It demonstrates:
@@ -27,6 +29,7 @@ This project monitors battery voltage using an STM32 microcontroller, displays s
 
 |Version|Date|Description|
 |--|--|--|
+|4|2026-03|Implement PWM to control pitch for passive buzzer|
 |3|2026-03|Integrate BMP180 sensor with I2C, monitor tasks with watchdog, implement direct task notifications, and use software timer for status LED|
 |2|2026-02|Turn on LED based on voltage in ADC, output to UART, and control battery variable with mutex and semaphore|
 |1|2026-01|Implement tutorials for basic ADC, semaphore, mutex, queue, tasks, and timer|

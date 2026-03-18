@@ -1,4 +1,0 @@
-../Core/Src/bmp180.c:11:6:BMP180_Init	2
-../Core/Src/bmp180.c:23:6:BMP180_ReadCalibrationData	2
-../Core/Src/bmp180.c:47:7:BMP180_GetTemperature	1
-../Core/Src/bmp180.c:55:7:BMP180_GetPressure	1

@@ -28,7 +28,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app_tasks.h"
-#include "bsp.h"
 #include "globals.h"
 #include "gpio.h"
 #include "interrupts.h"
