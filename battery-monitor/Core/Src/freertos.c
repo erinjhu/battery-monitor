@@ -25,12 +25,14 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "usart.h"
+#include "messages.h"
+#include "globals.h"
+#include "app_tasks.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -93,7 +95,10 @@ void MX_FREERTOS_Init(void) {
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-
+  xTaskUARTHandle = osThreadNew(vTaskUART, NULL, &xTaskUART_attributes);
+  xTaskAlarmHandle = osThreadNew(vTaskAlarm, NULL, &xTaskAlarm_attributes);
+  xTaskEnvMgrHandle = osThreadNew(vTaskEnvMgr, NULL, &xTaskAlarm_attributes);
+  xTaskVoltageMgrHandle = osThreadNew(vTaskVoltageMgr, NULL, &xTaskAlarm_attributes);
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -114,9 +119,11 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
+  HAL_StatusTypeDef halErrCode;
   /* Infinite loop */
   for(;;)
   {
+    RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Default task\r\n", 19, 100), &healthFlags.uart);
     osDelay(1);
   }
   /* USER CODE END StartDefaultTask */

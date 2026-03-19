@@ -1,5 +1,10 @@
 # Obstacles
 
+## Mar 18, 2026
+- Did not know that you can compile in the STM32 IDE without the board attached.
+- Forgot to create the threads, so nothing was running.
+- Forgetting to define extern variables after declaring them
+
 ## Mar 14, 2026
 - Use bit shifting instead of pow() from math.h.
 

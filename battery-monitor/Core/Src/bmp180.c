@@ -52,7 +52,8 @@ void BMP180_ReadCalibrationData(void) {
 float BMP180_GetTemperature(void) {
     // Write command to control register
     HAL_StatusTypeDef halErrCode;
-    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Write(&hi2c1, BMP180_I2C_DEVICE_ADDR, BMP180_REG_CONTROl, I2C_MEMADD_SIZE_8BIT, BMP180_TEMP_CMD, 1,100), &healthFlags.bmp180);
+    uint8_t temp_cmd = BMP180_TEMP_CMD;
+    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Write(&hi2c1, BMP180_I2C_DEVICE_ADDR, BMP180_REG_CONTROl, I2C_MEMADD_SIZE_8BIT, &temp_cmd, 1,100), &healthFlags.bmp180);
     // Delay task for 4.5 ms
     osDelay(5);
     // Read raw UT bits
@@ -81,8 +82,9 @@ static float BMP180_CalcTrueTemp(float uncomp_temp) {
 
 float BMP180_GetPressure(void) {
     // Write command to control register
+    uint8_t pressure_cmd = BMP180_PRESSURE_CMD;
     HAL_StatusTypeDef halErrCode;
-    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Write(&hi2c1, BMP180_I2C_DEVICE_ADDR, BMP180_REG_CONTROl, I2C_MEMADD_SIZE_8BIT, BMP180_PRESSURE_CMD,1,100), &healthFlags.bmp180);
+    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Write(&hi2c1, BMP180_I2C_DEVICE_ADDR, BMP180_REG_CONTROl, I2C_MEMADD_SIZE_8BIT, &pressure_cmd,1,100), &healthFlags.bmp180);
     // Delay task based on oversampling setting
     osDelay(bmp180_conv_time[BMP180_OSS]);
     // Read raw UP bits
@@ -95,7 +97,6 @@ static float BMP180_ReadUncompPressure(void) {
     uint8_t msb = 0x0;
     uint8_t lsb = 0x0;
     uint8_t xlsb = 0x0;
-    uint16_t uncomp_temp = 0x0;
     RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Read(&hi2c1,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_MSB,I2C_MEMADD_SIZE_8BIT,&msb,1,100), &healthFlags.bmp180);
     RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Read(&hi2c1,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_LSB,I2C_MEMADD_SIZE_8BIT,&lsb,1,100), &healthFlags.bmp180);
     RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Read(&hi2c1,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_XLSB,I2C_MEMADD_SIZE_8BIT,&xlsb,1,100), &healthFlags.bmp180);

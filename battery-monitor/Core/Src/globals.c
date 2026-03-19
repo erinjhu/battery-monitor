@@ -2,6 +2,8 @@
 #include "messages.h"
 
 volatile float fBatteryVoltage = 0.0f;
+volatile float fBatteryTemperature = 0.0f;
+volatile float fBatteryPressure = 0.0f;
 const float fThresholdVoltage = 1.5f;
 volatile uint32_t currentTime = 0;
 volatile uint32_t previousTime = 0;

@@ -61,6 +61,8 @@ void logMsgFromTask(ErrorCode_t errCode, MsgType_t type, const char *file, const
 
 #define LOG_FROM_TASK(_errCode, _type, _message) logMsgFromTask((_errCode), (_type), __FILE__, __func__, __LINE__, (_message))
 
+void report_error(ErrorCode_t errCode, const char *file, const char *func, int line);
+
 #define REPORT_ERROR(errCode, _healthFlag) report_error((errCode), __FILE__, __func__, __LINE__)
 
 
@@ -70,7 +72,7 @@ void logMsgFromTask(ErrorCode_t errCode, MsgType_t type, const char *file, const
     if (cmsisErrCode != osOK) { \
       *_healthFlag = HEALTH_ERROR; /* or your error code */ \
       REPORT_ERROR(cmsisErrCode, _healthFlag); \
-      return cmsisErrCode; \
+      return; \
     } \
   } while (0)
 
@@ -80,8 +82,11 @@ void logMsgFromTask(ErrorCode_t errCode, MsgType_t type, const char *file, const
     if (halErrCode != HAL_OK) { \
       *_healthFlag = HEALTH_ERROR; /* or your error code */ \
       REPORT_ERROR(halErrCode, _heathFlag); \
-      return halErrCode; \
+      return; \
     } \
   } while (0)
 
+
+
+  
 #endif // MESSAGES_H

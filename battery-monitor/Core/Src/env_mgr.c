@@ -1,4 +1,3 @@
-#include "env_mgr.h"
 #include "main.h"
 #include "cmsis_os.h"
 #include "bmp180.h"
@@ -6,6 +5,18 @@
 #include "globals.h"
 #include "iwdg.h"
 #include "app_tasks.h"
+
+osThreadId_t xTaskEnvMgrHandle;
+uint32_t xTaskEnvMgrBuffer[ 128 ];
+osThreadDef_t xTaskEnvMgrControlBlock;
+const osThreadAttr_t xTaskEnv_attributes = {
+  .name = "xTaskEnvMgr",
+  .cb_mem = &xTaskEnvMgrControlBlock,
+  .cb_size = sizeof(xTaskEnvMgrControlBlock),
+  .stack_mem = &xTaskEnvMgrBuffer[0],
+  .stack_size = sizeof(xTaskEnvMgrBuffer),
+  .priority = (osPriority_t) osPriorityHigh,
+};
 
 void vTaskEnvMgr(void *argument)
 {
@@ -24,7 +35,7 @@ void vTaskEnvMgr(void *argument)
         UARTMsg_t pressureMessage = {.type = MSG_TYPE_PRESSURE, .value = fBatteryPressure};
         RETURN_IF_ERROR_CODE_CMSIS(osMessageQueuePut(xUARTQueueHandle, &tempMessage, 0U, 10), &healthFlags.env_mgr);
         RETURN_IF_ERROR_CODE_CMSIS(osMessageQueuePut(xUARTQueueHandle, &pressureMessage, 0U,10), &healthFlags.env_mgr);
-        xTaskNotifyGive(xTaskAlarm);
+        xTaskNotifyGive(xTaskAlarmHandle);
         RETURN_IF_ERROR_CODE_CMSIS(osMutexRelease(xMutexHandle), &healthFlags.env_mgr);
         healthFlags.env_mgr = HEALTH_OK;
         osDelay(1000);

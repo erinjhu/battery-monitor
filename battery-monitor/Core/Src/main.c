@@ -32,8 +32,6 @@
 #include "gpio.h"
 #include "interrupts.h"
 #include "messages.h"
-#include "env_mgr.h"
-#include "voltage_mgr.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

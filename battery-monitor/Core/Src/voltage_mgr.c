@@ -1,4 +1,3 @@
-#include "voltage_mgr.h"
 #include "main.h"
 #include "cmsis_os.h"
 #include "globals.h"
@@ -10,14 +9,15 @@
 #include "adc.h"
 #include "app_tasks.h"
 
-uint32_t xTaskSensorBuffer[ 128 ];
-osThreadDef_t xTaskSensorControlBlock;
-const osThreadAttr_t xTaskSensor_attributes = {
-  .name = "xTaskSensor",
-  .cb_mem = &xTaskSensorControlBlock,
-  .cb_size = sizeof(xTaskSensorControlBlock),
-  .stack_mem = &xTaskSensorBuffer[0],
-  .stack_size = sizeof(xTaskSensorBuffer),
+osThreadId_t xTaskVoltageMgrHandle;
+uint32_t xTaskVoltageMgrBuffer[ 128 ];
+osThreadDef_t xTaskVoltageMgrControlBlock;
+const osThreadAttr_t xTaskVoltageMgr_attributes = {
+  .name = "xTaskVoltageMgr",
+  .cb_mem = &xTaskVoltageMgrControlBlock,
+  .cb_size = sizeof(xTaskVoltageMgrControlBlock),
+  .stack_mem = &xTaskVoltageMgrBuffer[0],
+  .stack_size = sizeof(xTaskVoltageMgrBuffer),
   .priority = (osPriority_t) osPriorityLow,
 };
 
@@ -40,7 +40,7 @@ void vTaskVoltageMgr(void *argument)
     UARTMsg_t batteryMessage = {.type = MSG_TYPE_VOLTAGE, .value = fBatteryVoltage};
     RETURN_IF_ERROR_CODE_CMSIS(osMessageQueuePut(xUARTQueueHandle, &batteryMessage, 0U, 10), &healthFlags.voltage_mgr);
     // osSemaphoreRelease(xBinSemHandle);
-    xTaskNotifyGive(xTaskAlarm);
+    xTaskNotifyGive(xTaskAlarmHandle);
     RETURN_IF_ERROR_CODE_CMSIS(osMutexRelease(xMutexHandle), &healthFlags.voltage_mgr);
     healthFlags.voltage_mgr = HEALTH_OK;
     osDelay(100);

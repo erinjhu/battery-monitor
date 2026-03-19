@@ -30,7 +30,7 @@
 // Control register
 #define BMP180_REG_CONTROl      0xF4
 #define BMP180_TEMP_CMD         0x2E
-#define BMP180_PRESSURE_CMD     (0x34 + (BMP180_OSS << 6))
+#define BMP180_PRESSURE_CMD     (int)(0x34 + (BMP180_OSS << 6))
 
 // I2C addresses
 #define BMP180_I2C_READ_ADDR 0xEF

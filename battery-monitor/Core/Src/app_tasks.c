@@ -77,9 +77,10 @@ const osThreadAttr_t xTaskAlarm_attributes = {
 void vTaskAlarm(void *argument)
 {
   /* USER CODE BEGIN vTaskAlarm */
-  RETURN_IF_ERROR_CODE_HEALTH(HAL_UART_Transmit(&huart2, (uint8_t*)"Alarm Task Started\r\n", 21, 100), &healthFlags.alarm);
   HAL_StatusTypeDef halErrCode;
   osStatus_t cmsisErrCode;
+  RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Alarm Task Started\r\n", 21, 100), &healthFlags.alarm);
+  
   /* Infinite loop */
   for(;;)
   {
@@ -87,7 +88,7 @@ void vTaskAlarm(void *argument)
     // RETURN_IF_ERROR_CODE(osSemaphoreAcquire(xBinSemHandle, HAL_MAX_DELAY));
     RETURN_IF_ERROR_CODE_CMSIS(osMutexAcquire(xMutexHandle,100), &healthFlags.alarm);
     float batteryVoltage = fBatteryVoltage;
-    RETURN_IF_ERROR_CODE_HEALTH(osMutexRelease(xMutexHandle), &healthFlags.alarm);
+    RETURN_IF_ERROR_CODE_CMSIS(osMutexRelease(xMutexHandle), &healthFlags.alarm);
     if (batteryVoltage > fThresholdVoltage)
     {
       RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on green LED\r\n", 30, 100), &healthFlags.alarm);
@@ -109,7 +110,7 @@ void vTaskAlarm(void *argument)
 osThreadId_t xTaskWatchdog;
 uint32_t xTaskWatchdogBuffer[ 128 ];
 osThreadDef_t xTaskWatchdogControlBlock;
-const osThreadAttr_t xTaskWatchdog_attributges = {
+const osThreadAttr_t xTaskWatchdog_attributes = {
   .name = "xTaskWatchdog",
   .cb_mem = &xTaskWatchdogControlBlock,
   .cb_size = sizeof(xTaskWatchdogControlBlock),
