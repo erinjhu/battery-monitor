@@ -49,6 +49,7 @@ typedef struct {
     HealthFlag_t alarm;
     HealthFlag_t button;
     HealthFlag_t bmp180;
+    HealthFlag_t watchdog;
 } SystemHealth_t;
 
 /* USER CODE END Private defines */

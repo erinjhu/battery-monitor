@@ -1,14 +1,16 @@
 #include "globals.h"
+#include "messages.h"
 
 volatile float fBatteryVoltage = 0.0f;
 const float fThresholdVoltage = 1.5f;
 volatile uint32_t currentTime = 0;
 volatile uint32_t previousTime = 0;
+SystemHealth_t healthFlags;
 
 
 osMessageQueueId_t xUARTQueueHandle;
 uint8_t xUARTQueueBuffer[ 16 * sizeof( UARTMsg_t ) ];
-osStaticMessageQDef_t xUARTQueueControlBlock;
+osMessageQDef_t xUARTQueueControlBlock;
 const osMessageQueueAttr_t xUARTQueue_attributes = {
   .name = "xUARTQueue",
   .cb_mem = &xUARTQueueControlBlock,
@@ -18,15 +20,15 @@ const osMessageQueueAttr_t xUARTQueue_attributes = {
 };
 
 osMutexId_t xMutexHandle;
-osStaticMutexDef_t xMutexControlBlock;
+osMutexDef_t xMutexControlBlock;
 const osMutexAttr_t xMutex_attributes = {
   .name = "xMutex",
   .cb_mem = &xMutexControlBlock,
   .cb_size = sizeof(xMutexControlBlock),
 };
 
-osSemaphoreId_t xBinSemHandle;
-osStaticSemaphoreDef_t xBinSemControlBlock;
+osMessageQDef_t xBinSemHandle;
+osThreadDef_t xBinSemControlBlock;
 const osSemaphoreAttr_t xBinSem_attributes = {
   .name = "xBinSem",
   .cb_mem = &xBinSemControlBlock,

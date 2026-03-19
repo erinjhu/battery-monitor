@@ -6,9 +6,12 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "iwdg.h"
+#include "usart.h"
+#include "adc.h"
+#include "app_tasks.h"
 
 uint32_t xTaskSensorBuffer[ 128 ];
-osStaticThreadDef_t xTaskSensorControlBlock;
+osThreadDef_t xTaskSensorControlBlock;
 const osThreadAttr_t xTaskSensor_attributes = {
   .name = "xTaskSensor",
   .cb_mem = &xTaskSensorControlBlock,
@@ -23,21 +26,22 @@ void vTaskVoltageMgr(void *argument)
   /* USER CODE BEGIN vTaskVoltageMgr */
   HAL_UART_Transmit(&huart2, (uint8_t*)"Sensor Task Started\r\n", 21, 100);
   /* Infinite loop */
-  osStatus_t errCode;
+  HAL_StatusTypeDef halErrCode;
+  osStatus_t cmsisErrCode;
   for(;;)
   {
     HAL_ADC_Start(&hadc1);
 
-    RETURN_IF_ERROR_CODE_HEALTH(HAL_ADC_PollForConversion(&hadc1,100), &healthFlags.voltage_mgr);
-    RETURN_IF_ERROR_CODE_HEALTH(osMutexAcquire(xMutexHandle,100), &healthFlags.voltage_mgr);
+    RETURN_IF_ERROR_CODE_HAL(HAL_ADC_PollForConversion(&hadc1,100), &healthFlags.voltage_mgr);
+    RETURN_IF_ERROR_CODE_CMSIS(osMutexAcquire(xMutexHandle,100), &healthFlags.voltage_mgr);
 
     uint32_t adcRaw = HAL_ADC_GetValue(&hadc1);
     fBatteryVoltage = (adcRaw * 3.3f) / 4095.0f;
     UARTMsg_t batteryMessage = {.type = MSG_TYPE_VOLTAGE, .value = fBatteryVoltage};
-    RETURN_IF_ERROR_CODE_HEALTH(osMessageQueuePut(xUARTQueueHandle, &batteryMessage, 0U, 10), &healthFlags.voltage_mgr);
+    RETURN_IF_ERROR_CODE_CMSIS(osMessageQueuePut(xUARTQueueHandle, &batteryMessage, 0U, 10), &healthFlags.voltage_mgr);
     // osSemaphoreRelease(xBinSemHandle);
     xTaskNotifyGive(xTaskAlarm);
-    RETURN_IF_ERROR_CODE_HEALTH(osMutexRelease(xMutexHandle), &healthFlags.voltage_mgr);
+    RETURN_IF_ERROR_CODE_CMSIS(osMutexRelease(xMutexHandle), &healthFlags.voltage_mgr);
     healthFlags.voltage_mgr = HEALTH_OK;
     osDelay(100);
   }

@@ -8,10 +8,16 @@ BMP180_CalibData_t calib_data;
 static const uint8_t bmp180_conv_time[4] = {5, 8, 14, 26};
 static int32_t b5;
 
+void BMP180_ReadCalibrationData(void);
+static float BMP180_ReadUncompTemp(void);
+static float BMP180_ReadUncompPressure(void);
+static float BMP180_CalcTruePressure(float uncomp_pressure);
+static float BMP180_CalcTrueTemp(float uncomp_temp);
+
 void BMP180_Init(void) {
     uint8_t chip_id = 0;
-    HAL_StatusTypeDef errCode;
-    RETURN_IF_ERROR_CODE_HEALTH(HAL_I2C_Mem_Read(&hi2c1, BMP180_I2C_DEVICE_ADDR, 0xD0, I2C_MEMADD_SIZE_8BIT, &chip_id, 1, 100), &healthFlags.bmp180);
+    HAL_StatusTypeDef halErrCode;
+    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Read(&hi2c1, BMP180_I2C_DEVICE_ADDR, 0xD0, I2C_MEMADD_SIZE_8BIT, &chip_id, 1, 100), &healthFlags.bmp180);
     if (chip_id == 0x55) {
         BMP180_ReadCalibrationData();
     }
@@ -24,11 +30,11 @@ void BMP180_Init(void) {
     }
 }
 
-static void BMP180_ReadCalibrationData(void) {
+void BMP180_ReadCalibrationData(void) {
+    HAL_StatusTypeDef halErrCode;
     // Read from I2C
     uint8_t calib_raw[22];
-    HAL_StatusTypeDef errCode;
-    RETURN_IF_ERROR_CODE_HEALTH(HAL_I2C_Mem_Read(&hi2c1, BMP180_I2C_DEVICE_ADDR, BMP180_REG_AC1_MSB, I2C_MEMADD_SIZE_8BIT, calib_raw, 22, 100), &healthFlags.bmp180);
+    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Read(&hi2c1, BMP180_I2C_DEVICE_ADDR, BMP180_REG_AC1_MSB, I2C_MEMADD_SIZE_8BIT, calib_raw, 22, 100), &healthFlags.bmp180);
     // Combine the bytes and put them into the struct
     calib_data.ac1 = (int16_t)((calib_raw[0] << 8) | calib_raw[1]);
     calib_data.ac2 = (int16_t)((calib_raw[2] << 8) | calib_raw[3]);
@@ -45,8 +51,8 @@ static void BMP180_ReadCalibrationData(void) {
 
 float BMP180_GetTemperature(void) {
     // Write command to control register
-    HAL_StatusTypeDef errCode;
-    RETURN_IF_ERROR_CODE_HEALTH(HAL_I2C_Mem_Write(&hi2c, BMP180_I2C_DEVICE_ADDR, BMP180_REG_CONTROl, I2C_MEMADD_SIZE_8BIT, BMP180_TEMP_CMD, 1,100), &healthFlags.bmp180);
+    HAL_StatusTypeDef halErrCode;
+    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Write(&hi2c1, BMP180_I2C_DEVICE_ADDR, BMP180_REG_CONTROl, I2C_MEMADD_SIZE_8BIT, BMP180_TEMP_CMD, 1,100), &healthFlags.bmp180);
     // Delay task for 4.5 ms
     osDelay(5);
     // Read raw UT bits
@@ -55,12 +61,12 @@ float BMP180_GetTemperature(void) {
 }
 
 static float BMP180_ReadUncompTemp(void) {
-    HAL_StatusTypeDef errCode;
+    HAL_StatusTypeDef halErrCode;
     uint8_t msb = 0x0;
     uint8_t lsb = 0x0;
     uint16_t uncomp_temp = 0x0;
-    RETURN_IF_ERROR_CODE_HEALTH(HAL_I2C_Mem_Read(&hi2c,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_MSB,I2C_MEMADD_SIZE_8BIT,&msb,1,100), &healthFlags.bmp180);
-    RETURN_IF_ERROR_CODE_HEALTH(HAL_I2C_Mem_Read(&hi2c,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_LSB,I2C_MEMADD_SIZE_8BIT,&lsb,1,100), &healthFlags.bmp180);
+    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Read(&hi2c1,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_MSB,I2C_MEMADD_SIZE_8BIT,&msb,1,100), &healthFlags.bmp180);
+    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Read(&hi2c1,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_LSB,I2C_MEMADD_SIZE_8BIT,&lsb,1,100), &healthFlags.bmp180);
     return (msb << 8) + lsb;
 }
 
@@ -75,8 +81,8 @@ static float BMP180_CalcTrueTemp(float uncomp_temp) {
 
 float BMP180_GetPressure(void) {
     // Write command to control register
-    HAL_StatusTypeDef errCode;
-    RETURN_IF_ERROR_CODE_HEALTH(HAL_I2C_Mem_Write(&hi2c, BMP180_I2C_DEVICE_ADDR, BMP180_REG_CONTROl, I2C_MEMADD_SIZE_8BIT, BMP180_PRESSURE_CMD,1,100), &healthFlags.bmp180);
+    HAL_StatusTypeDef halErrCode;
+    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Write(&hi2c1, BMP180_I2C_DEVICE_ADDR, BMP180_REG_CONTROl, I2C_MEMADD_SIZE_8BIT, BMP180_PRESSURE_CMD,1,100), &healthFlags.bmp180);
     // Delay task based on oversampling setting
     osDelay(bmp180_conv_time[BMP180_OSS]);
     // Read raw UP bits
@@ -85,13 +91,14 @@ float BMP180_GetPressure(void) {
 }
 
 static float BMP180_ReadUncompPressure(void) {
+    HAL_StatusTypeDef halErrCode;
     uint8_t msb = 0x0;
     uint8_t lsb = 0x0;
     uint8_t xlsb = 0x0;
     uint16_t uncomp_temp = 0x0;
-    RETURN_IF_ERROR_CODE_HEALTH(HAL_I2C_Mem_Read(&hi2c,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_MSB,I2C_MEMADD_SIZE_8BIT,&msb,1,100), &healthFlags.bmp180);
-    RETURN_IF_ERROR_CODE_HEALTH(HAL_I2C_Mem_Read(&hi2c,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_LSB,I2C_MEMADD_SIZE_8BIT,&lsb,1,100), &healthFlags.bmp180);
-    RETURN_IF_ERROR_CODE_HEALTH(HAL_I2C_Mem_Read(&hi2c,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_XLSB,I2C_MEMADD_SIZE_8BIT,&xlsb,1,100), &healthFlags.bmp180);
+    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Read(&hi2c1,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_MSB,I2C_MEMADD_SIZE_8BIT,&msb,1,100), &healthFlags.bmp180);
+    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Read(&hi2c1,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_LSB,I2C_MEMADD_SIZE_8BIT,&lsb,1,100), &healthFlags.bmp180);
+    RETURN_IF_ERROR_CODE_HAL(HAL_I2C_Mem_Read(&hi2c1,BMP180_I2C_DEVICE_ADDR,BMP180_REG_DATA_XLSB,I2C_MEMADD_SIZE_8BIT,&xlsb,1,100), &healthFlags.bmp180);
     return ((msb << 16) + (lsb << 8) + xlsb) >> (8 - BMP180_OSS);
 }
 

@@ -57,24 +57,31 @@ typedef struct
   char msg[64];
 } UARTMsg_t;
 
-#define LOG_FROM_TASK logMsgFromTask((errCode), (type), __FILE__, __func__, __LINE__, msg)
+void logMsgFromTask(ErrorCode_t errCode, MsgType_t type, const char *file, const char *func, int line, const char *message);
+
+#define LOG_FROM_TASK(_errCode, _type, _message) logMsgFromTask((_errCode), (_type), __FILE__, __func__, __LINE__, (_message))
 
 #define REPORT_ERROR(errCode, _healthFlag) report_error((errCode), __FILE__, __func__, __LINE__)
-#define RETURN_IF_ERROR_CODE(_ret)         \
- do {                                      \
-    errCode = _ret;                        \
-    if (errCode != osOK && errCode != HAL_OK) { \
-      REPORT_ERROR(errCode);               \
-      return errCode;                      \
-    }                                      \
-  } while (0)
-#define RETURN_IF_ERROR_CODE_HEALTH(_ret, _healthFlag) \
+
+
+#define RETURN_IF_ERROR_CODE_CMSIS(_ret, _healthFlag) \
   do { \
-    errCode = _ret; \
-    if (errCode != osOK && errCode != HAL_OK) { \
+    cmsisErrCode = _ret; \
+    if (cmsisErrCode != osOK) { \
       *_healthFlag = HEALTH_ERROR; /* or your error code */ \
-      REPORT_ERROR(errCode); \
-      return errCode; \
+      REPORT_ERROR(cmsisErrCode, _healthFlag); \
+      return cmsisErrCode; \
     } \
   } while (0)
+
+#define RETURN_IF_ERROR_CODE_HAL(_ret, _healthFlag) \
+  do { \
+    halErrCode = _ret; \
+    if (halErrCode != HAL_OK) { \
+      *_healthFlag = HEALTH_ERROR; /* or your error code */ \
+      REPORT_ERROR(halErrCode, _heathFlag); \
+      return halErrCode; \
+    } \
+  } while (0)
+
 #endif // MESSAGES_H
