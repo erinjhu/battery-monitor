@@ -30,7 +30,7 @@ const osThreadAttr_t xTaskUART_attributes = {
 void vTaskUART(void *argument)
 {
   /* USER CODE BEGIN vTaskUART */
-  
+  static int lastError = -1;
   HAL_StatusTypeDef halErrCode;
   osStatus_t cmsisErrCode;
   // RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"UART Task Started\r\n", 19, 100), &healthFlags.uart);
@@ -49,8 +49,9 @@ void vTaskUART(void *argument)
       snprintf(buffer, sizeof(buffer), "Raw: %u\r\n", (unsigned int)(msg.value * 1000));
       RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100), &healthFlags.uart);
     }
-    else if (msg.type == MSG_TYPE_ERROR)
+    else if (msg.type == MSG_TYPE_ERROR && msg.errCode != lastError)
     {
+      lastError = msg.errCode;
       // snprintf(buffer, sizeof(buffer), "Raw: %u\r\n", (unsigned int)(msg.value * 1000));
       snprintf(buffer, sizeof(buffer),
       "Error code: %d\r\nFile: %s\r\nFunc: %s\r\nLine: %d\r\nMsg: %s\r\n",
