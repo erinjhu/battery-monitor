@@ -16,7 +16,7 @@
 
 
 osThreadId_t xTaskUARTHandle;
-uint32_t xTaskUARTBuffer[ 128 ];
+uint32_t xTaskUARTBuffer[ 512 ];
 StaticTask_t xTaskUARTControlBlock;
 const osThreadAttr_t xTaskUART_attributes = {
   .name = "xTaskUART",
@@ -42,7 +42,7 @@ void vTaskUART(void *argument)
   {
     RETURN_IF_ERROR_CODE_CMSIS(osMessageQueueGet(xUARTQueueHandle, &msg, NULL, osWaitForever), &healthFlags.uart);
     // use osWaitForever to block the task until a msg arrives in the queue  
-    char buffer[64];
+    char buffer[256];
     if (msg.type == MSG_TYPE_VOLTAGE)
     {
       // snprintf(buffer, sizeof(buffer), "Voltage: %u.%02u V\r\n", msg.value);
@@ -51,7 +51,14 @@ void vTaskUART(void *argument)
     }
     else if (msg.type == MSG_TYPE_ERROR)
     {
-      snprintf(buffer, sizeof(buffer), "Error code: %d \r\n", msg.errCode);
+      // snprintf(buffer, sizeof(buffer), "Raw: %u\r\n", (unsigned int)(msg.value * 1000));
+      snprintf(buffer, sizeof(buffer),
+      "Error code: %d\r\nFile: %s\r\nFunc: %s\r\nLine: %d\r\nMsg: %s\r\n",
+      msg.errCode,
+      msg.file ? msg.file : "?",   // handle NULL pointers
+      msg.func ? msg.func : "?",
+      msg.line,
+      msg.msg);
       RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100), &healthFlags.uart);
     }
     else if (msg.type == MSG_TYPE_BUTTON)
