@@ -7,7 +7,7 @@
 #include "usart.h"
 #include <stdio.h>
 #include <string.h>
-
+#include "FreeRTOS.h" 
 
 
 
@@ -17,7 +17,7 @@
 
 osThreadId_t xTaskUARTHandle;
 uint32_t xTaskUARTBuffer[ 128 ];
-osThreadDef_t xTaskUARTControlBlock;
+StaticTask_t xTaskUARTControlBlock;
 const osThreadAttr_t xTaskUART_attributes = {
   .name = "xTaskUART",
   .cb_mem = &xTaskUARTControlBlock,
@@ -64,7 +64,7 @@ void vTaskUART(void *argument)
 
 osThreadId_t xTaskAlarmHandle;
 uint32_t xTaskAlarmBuffer[ 128 ];
-osThreadDef_t xTaskAlarmControlBlock;
+StaticTask_t xTaskAlarmControlBlock;
 const osThreadAttr_t xTaskAlarm_attributes = {
   .name = "xTaskAlarm",
   .cb_mem = &xTaskAlarmControlBlock,
@@ -107,9 +107,9 @@ void vTaskAlarm(void *argument)
 }
 
 
-osThreadId_t xTaskWatchdog;
+osThreadId_t xTaskWatchdogHandle;
 uint32_t xTaskWatchdogBuffer[ 128 ];
-osThreadDef_t xTaskWatchdogControlBlock;
+StaticTask_t xTaskWatchdogControlBlock;
 const osThreadAttr_t xTaskWatchdog_attributes = {
   .name = "xTaskWatchdog",
   .cb_mem = &xTaskWatchdogControlBlock,
@@ -124,7 +124,7 @@ void vTaskWatchdog(void *argument)
   /* USER CODE BEGIN vTaskUART */
   HAL_StatusTypeDef halErrCode;
   MsgType_t type;
-  RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Watchdog Task Started\r\n", 19, 100), &healthFlags.watchdog);
+  RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Watchdog Task\r\n", 19, 100), &healthFlags.watchdog);
   UARTMsg_t msg;
   /* Infinite loop */
   for(;;)

@@ -78,6 +78,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
+  xMutexHandle = osMutexNew(&xMutex_attributes);
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
@@ -90,17 +91,20 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+  xUARTQueueHandle = osMessageQueueNew(16, sizeof(UARTMsg_t), &xUARTQueue_attributes);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-  xTaskUARTHandle = osThreadNew(vTaskUART, NULL, &xTaskUART_attributes);
-  xTaskAlarmHandle = osThreadNew(vTaskAlarm, NULL, &xTaskAlarm_attributes);
-  xTaskEnvMgrHandle = osThreadNew(vTaskEnvMgr, NULL, &xTaskAlarm_attributes);
-  xTaskVoltageMgrHandle = osThreadNew(vTaskVoltageMgr, NULL, &xTaskAlarm_attributes);
+  
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  xTaskUARTHandle = osThreadNew(vTaskUART, NULL, &xTaskUART_attributes);
+  xTaskAlarmHandle = osThreadNew(vTaskAlarm, NULL, &xTaskAlarm_attributes);
+  xTaskEnvMgrHandle = osThreadNew(vTaskEnvMgr, NULL, &xTaskEnvMgr_attributes);
+  xTaskVoltageMgrHandle = osThreadNew(vTaskVoltageMgr, NULL, &xTaskVoltageMgr_attributes);
+  xTaskWatchdogHandle = osThreadNew(vTaskWatchdog, NULL, &xTaskWatchdog_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -124,7 +128,7 @@ void StartDefaultTask(void *argument)
   for(;;)
   {
     RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Default task\r\n", 19, 100), &healthFlags.uart);
-    osDelay(1);
+    osDelay(100);
   }
   /* USER CODE END StartDefaultTask */
 }

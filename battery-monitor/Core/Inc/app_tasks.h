@@ -20,6 +20,8 @@ extern const osThreadAttr_t xTaskWatchdog_attributes;
 extern const osThreadAttr_t xTaskUART_attributes;
 extern const osThreadAttr_t xTaskEnvMgr_attributes;
 extern const osThreadAttr_t xTaskVoltageMgr_attributes;
+extern const osThreadAttr_t xUARTQueue_attributes;
+extern const osThreadAttr_t xMutex_attributes;
 
 
 

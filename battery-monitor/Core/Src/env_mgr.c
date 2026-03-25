@@ -8,8 +8,8 @@
 
 osThreadId_t xTaskEnvMgrHandle;
 uint32_t xTaskEnvMgrBuffer[ 128 ];
-osThreadDef_t xTaskEnvMgrControlBlock;
-const osThreadAttr_t xTaskEnv_attributes = {
+StaticTask_t xTaskEnvMgrControlBlock;
+const osThreadAttr_t xTaskEnvMgr_attributes = {
   .name = "xTaskEnvMgr",
   .cb_mem = &xTaskEnvMgrControlBlock,
   .cb_size = sizeof(xTaskEnvMgrControlBlock),

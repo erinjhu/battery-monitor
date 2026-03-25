@@ -11,7 +11,7 @@
 
 osThreadId_t xTaskVoltageMgrHandle;
 uint32_t xTaskVoltageMgrBuffer[ 128 ];
-osThreadDef_t xTaskVoltageMgrControlBlock;
+StaticTask_t xTaskVoltageMgrControlBlock;
 const osThreadAttr_t xTaskVoltageMgr_attributes = {
   .name = "xTaskVoltageMgr",
   .cb_mem = &xTaskVoltageMgrControlBlock,
