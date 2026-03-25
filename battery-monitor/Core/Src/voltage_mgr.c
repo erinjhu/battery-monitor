@@ -18,13 +18,14 @@ const osThreadAttr_t xTaskVoltageMgr_attributes = {
   .cb_size = sizeof(xTaskVoltageMgrControlBlock),
   .stack_mem = &xTaskVoltageMgrBuffer[0],
   .stack_size = sizeof(xTaskVoltageMgrBuffer),
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 
 void vTaskVoltageMgr(void *argument)
 {
   /* USER CODE BEGIN vTaskVoltageMgr */
-  HAL_UART_Transmit(&huart2, (uint8_t*)"Sensor Task Started\r\n", 21, 100);
+  // HAL_UART_Transmit(&huart2, (uint8_t*)"Sensor Task Started\r\n", 21, 100);
+  LOG_FROM_TASK(ERR_CODE_SUCCESS, MSG_TYPE_HEALTH, "Sensor Task Started");
   /* Infinite loop */
   HAL_StatusTypeDef halErrCode;
   osStatus_t cmsisErrCode;

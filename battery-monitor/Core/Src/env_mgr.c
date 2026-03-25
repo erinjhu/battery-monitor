@@ -15,7 +15,7 @@ const osThreadAttr_t xTaskEnvMgr_attributes = {
   .cb_size = sizeof(xTaskEnvMgrControlBlock),
   .stack_mem = &xTaskEnvMgrBuffer[0],
   .stack_size = sizeof(xTaskEnvMgrBuffer),
-  .priority = (osPriority_t) osPriorityHigh,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 
 void vTaskEnvMgr(void *argument)

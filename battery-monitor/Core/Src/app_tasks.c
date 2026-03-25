@@ -24,7 +24,7 @@ const osThreadAttr_t xTaskUART_attributes = {
   .cb_size = sizeof(xTaskUARTControlBlock),
   .stack_mem = &xTaskUARTBuffer[0],
   .stack_size = sizeof(xTaskUARTBuffer),
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 
 void vTaskUART(void *argument)
@@ -33,7 +33,9 @@ void vTaskUART(void *argument)
   
   HAL_StatusTypeDef halErrCode;
   osStatus_t cmsisErrCode;
-  RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"UART Task Started\r\n", 19, 100), &healthFlags.uart);
+  // RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"UART Task Started\r\n", 19, 100), &healthFlags.uart);
+  // const char *message = "UART Task Started\r\n";
+  // RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)message, strlen(message), HAL_MAX_DELAY), &healthFlags.uart);
   UARTMsg_t msg;
   /* Infinite loop */
   for(;;)
@@ -63,7 +65,7 @@ void vTaskUART(void *argument)
 }
 
 osThreadId_t xTaskAlarmHandle;
-uint32_t xTaskAlarmBuffer[ 128 ];
+uint32_t xTaskAlarmBuffer[ 256 ];
 StaticTask_t xTaskAlarmControlBlock;
 const osThreadAttr_t xTaskAlarm_attributes = {
   .name = "xTaskAlarm",
@@ -79,8 +81,9 @@ void vTaskAlarm(void *argument)
   /* USER CODE BEGIN vTaskAlarm */
   HAL_StatusTypeDef halErrCode;
   osStatus_t cmsisErrCode;
-  RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Alarm Task Started\r\n", 21, 100), &healthFlags.alarm);
-  
+  const char *msg = "Alarm Task Started\r\n";
+  // RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY), &healthFlags.uart);
+  LOG_FROM_TASK(ERR_CODE_SUCCESS, MSG_TYPE_HEALTH, "Alarm Task Started");
   /* Infinite loop */
   for(;;)
   {
@@ -91,13 +94,14 @@ void vTaskAlarm(void *argument)
     RETURN_IF_ERROR_CODE_CMSIS(osMutexRelease(xMutexHandle), &healthFlags.alarm);
     if (batteryVoltage > fThresholdVoltage)
     {
-      RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on green LED\r\n", 30, 100), &healthFlags.alarm);
+      LOG_FROM_TASK(ERR_CODE_SUCCESS, MSG_TYPE_HEALTH, "Green LED ON");
+      // RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on green LED\r\n", 30, 100), &healthFlags.alarm);
       HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_SET);
       HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_RESET);
     } 
     else
     {
-      RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on red LED\r\n", 30, 100), &healthFlags.alarm);
+      LOG_FROM_TASK(ERR_CODE_SUCCESS, MSG_TYPE_HEALTH, "Red LED ON");
       HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_SET);
       HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET);
     }
@@ -116,7 +120,7 @@ const osThreadAttr_t xTaskWatchdog_attributes = {
   .cb_size = sizeof(xTaskWatchdogControlBlock),
   .stack_mem = &xTaskWatchdogBuffer[0],
   .stack_size = sizeof(xTaskWatchdogBuffer),
-  .priority = (osPriority_t) osPriorityHigh,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 
 void vTaskWatchdog(void *argument)
@@ -124,7 +128,7 @@ void vTaskWatchdog(void *argument)
   /* USER CODE BEGIN vTaskUART */
   HAL_StatusTypeDef halErrCode;
   MsgType_t type;
-  RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Watchdog Task\r\n", 19, 100), &healthFlags.watchdog);
+  LOG_FROM_TASK(ERR_CODE_SUCCESS, MSG_TYPE_HEALTH, "Watchdog Task Started");
   UARTMsg_t msg;
   /* Infinite loop */
   for(;;)

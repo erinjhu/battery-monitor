@@ -54,7 +54,7 @@ osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityLow,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -127,7 +127,8 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Default task\r\n", 19, 100), &healthFlags.uart);
+    // RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Default task\r\n", 19, 100), &healthFlags.uart);
+    LOG_FROM_TASK(ERR_CODE_SUCCESS, MSG_TYPE_HEALTH, "Sensor Task Started");
     osDelay(100);
   }
   /* USER CODE END StartDefaultTask */

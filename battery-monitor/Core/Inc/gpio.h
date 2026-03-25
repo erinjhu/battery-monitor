@@ -33,9 +33,9 @@ extern "C" {
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
-#define GPIO_GREEN_LED 5
-#define GPIO_RED_LED 6
-#define GPIO_BUTTON 13
+#define GPIO_GREEN_LED GPIO_PIN_5
+#define GPIO_RED_LED GPIO_PIN_6
+#define GPIO_BUTTON GPIO_PIN_13
 /* USER CODE END Private defines */
 
 void MX_GPIO_Init(void);

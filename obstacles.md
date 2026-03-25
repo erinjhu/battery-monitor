@@ -4,6 +4,8 @@
 - Only the default task was printing to the putty terminal. Put breakpoint into MX_FREERTOS_Init(). osThreadNew() valid handle for default task but NULL for the other ones. Not enough memory for the statically allocated buffer for the task.
     - Control Block (TCB): memory to manage the task's state, stack pointer, and priority
 - Forgot to create the queue and mutex; made the handles but didn't call the functions to create them
+- Did not know that tasks are not allowed to return in FreeRTOS
+- Multiple tasks trying to use the same UART handle messing up the terminal prints
 
 ## Mar 18, 2026
 - Did not know that you can compile in the STM32 IDE without the board attached.
