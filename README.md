@@ -35,6 +35,8 @@ This project monitors battery voltage using an STM32 microcontroller, displays s
 |1|2026-01|Implement tutorials for basic ADC, semaphore, mutex, queue, tasks, and timer|
 
 ## Next Steps
+- Implement project error type
+- Fix I2C error
 - BME280: I2C
 - 74HC595: SPI, 7-segment display
 - Buzzer: PWM tones
