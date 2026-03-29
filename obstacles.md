@@ -1,8 +1,11 @@
 # Obstacles
 
+pain.
+
 ## Mar 26, 2026
 - git restore .
 - Couldn't figure out why updated outputs weren't printing. Had to clean the project
+- Running code before uart was initialized
 
 ## Mar 24, 2026
 - Only the default task was printing to the putty terminal. Put breakpoint into MX_FREERTOS_Init(). osThreadNew() valid handle for default task but NULL for the other ones. Not enough memory for the statically allocated buffer for the task.
