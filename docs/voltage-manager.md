@@ -53,3 +53,7 @@ typedef struct {
 } UARTMsg_t;
 ```
 
+## ADC
+
+Implemented a ring buffer that saves the last 8 readings.
+

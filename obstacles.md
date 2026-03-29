@@ -3,9 +3,11 @@
 pain.
 
 ## Mar 26, 2026
-- git restore .
+- Accidental git restore .
 - Couldn't figure out why updated outputs weren't printing. Had to clean the project
 - Running code before uart was initialized
+- Watchdog task was logging all the health flags, causing the alarm task to not turn on the LEDs. Could be due to filling up the UART queue, causing the watchdog task to block.
+- Not receiving any data from the BMP180. Changed pins to GPIO to turn on LEDs and pins seem to be working fine
 
 ## Mar 24, 2026
 - Only the default task was printing to the putty terminal. Put breakpoint into MX_FREERTOS_Init(). osThreadNew() valid handle for default task but NULL for the other ones. Not enough memory for the statically allocated buffer for the task.

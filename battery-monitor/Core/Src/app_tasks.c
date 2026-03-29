@@ -146,7 +146,7 @@ void vTaskWatchdog(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    logAllHealthFlags();
+    // logAllHealthFlags();
     if (healthFlags.uart == HEALTH_OK && healthFlags.alarm == HEALTH_OK && healthFlags.bmp180 == HEALTH_OK && healthFlags.button == HEALTH_OK && healthFlags.env_mgr == HEALTH_OK && healthFlags.voltage_mgr == HEALTH_OK)
     {
       LOG_FROM_TASK(ERR_CODE_WATCHDOG_HEALTHY, MSG_TYPE_HEALTH, "watchdog healthy");
