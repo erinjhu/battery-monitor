@@ -89,7 +89,13 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST) != RESET) {
+      // Watchdog reset occurred
+      // Indicate this (e.g., blink an LED, send a UART message)
+      // Example:
+      LOG_FROM_TASK(ERR_CODE_SUCCESS, MSG_TYPE_HEALTH, "Watchdog reset detected!");
+      __HAL_RCC_CLEAR_RESET_FLAGS(); // Clear the reset flags for next time
+  }
   /* USER CODE END Init */
 
   /* Configure the system clock */

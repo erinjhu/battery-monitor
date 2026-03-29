@@ -46,25 +46,30 @@ void vTaskUART(void *argument)
     if (msg.type == MSG_TYPE_VOLTAGE)
     {
       // snprintf(buffer, sizeof(buffer), "Voltage: %u.%02u V\r\n", msg.value);
-      snprintf(buffer, sizeof(buffer), "Raw: %u\r\n", (unsigned int)(msg.value * 1000));
+      snprintf(buffer, sizeof(buffer), "[MSG_TYPE_VOLTAGE] Raw: %u\r\n", (unsigned int)(msg.value * 1000));
       RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100), &healthFlags.uart);
     }
     else if (msg.type == MSG_TYPE_ERROR && msg.errCode != lastError)
     {
       lastError = msg.errCode;
       // snprintf(buffer, sizeof(buffer), "Raw: %u\r\n", (unsigned int)(msg.value * 1000));
-      snprintf(buffer, sizeof(buffer),
-      "Error code: %d\r\nFile: %s\r\nFunc: %s\r\nLine: %d\r\nMsg: %s\r\n",
-      msg.errCode,
-      msg.file ? msg.file : "?",   // handle NULL pointers
-      msg.func ? msg.func : "?",
-      msg.line,
-      msg.msg);
-      RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100), &healthFlags.uart);
+      // snprintf(buffer, sizeof(buffer),
+      // "Error code: %d\r\nFile: %s\r\nFunc: %s\r\nLine: %d\r\nMsg: %s\r\n",
+      // msg.errCode,
+      // msg.file ? msg.file : "?",   // handle NULL pointers
+      // msg.func ? msg.func : "?",
+      // msg.line,
+      // msg.msg);
+      // RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100), &healthFlags.uart);
     }
     else if (msg.type == MSG_TYPE_BUTTON)
     {
-      snprintf(buffer, sizeof(buffer), "Button pressed");
+      snprintf(buffer, sizeof(buffer), "[MSG_TYPE_BUTTON] Button pressed\r\n");
+      RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100), &healthFlags.uart);
+    }
+    else if (msg.type == MSG_TYPE_HEALTH)
+    {
+      snprintf(buffer, sizeof(buffer), "[MSG_TYPE_HEALTH] %s \r\n", msg.msg);
       RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 100), &healthFlags.uart);
     }
     healthFlags.uart = HEALTH_OK;
@@ -141,6 +146,7 @@ void vTaskWatchdog(void *argument)
   /* Infinite loop */
   for(;;)
   {
+    logAllHealthFlags();
     if (healthFlags.uart == HEALTH_OK && healthFlags.alarm == HEALTH_OK && healthFlags.bmp180 == HEALTH_OK && healthFlags.button == HEALTH_OK && healthFlags.env_mgr == HEALTH_OK && healthFlags.voltage_mgr == HEALTH_OK)
     {
       LOG_FROM_TASK(ERR_CODE_WATCHDOG_HEALTHY, MSG_TYPE_HEALTH, "watchdog healthy");
