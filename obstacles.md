@@ -8,6 +8,8 @@ pain.
 - Running code before uart was initialized
 - Watchdog task was logging all the health flags, causing the alarm task to not turn on the LEDs. Could be due to filling up the UART queue, causing the watchdog task to block.
 - Not receiving any data from the BMP180. Changed pins to GPIO to turn on LEDs and pins seem to be working fine
+- Was reading pinout upside down so connected to wrong pin.
+- Had correct prescaler and period but not the right frequency, so didn't show pulsing LED; LED was just staying on
 
 ## Mar 24, 2026
 - Only the default task was printing to the putty terminal. Put breakpoint into MX_FREERTOS_Init(). osThreadNew() valid handle for default task but NULL for the other ones. Not enough memory for the statically allocated buffer for the task.

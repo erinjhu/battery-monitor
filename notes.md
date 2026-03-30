@@ -42,7 +42,7 @@ $f_{\text{PWM}} = \frac{f_\text{clock}}{(1 + \text{Prescaler})(1 + \text{Period}
 | $f_{\text{PWM}}$   | number of full on-off cycles completed per second (desired clock to run PWM signal)                                                                                                   |
 | $f_{\text{clock}}$ | number of full on-off cycles completed per second (given clock; usually depends on the device)                                                                                        |
 | $\text{Prescaler}$ | factor to divide the system clock by to get a slower value. use 1 + prescaler because there is a tick when the counter is at 0.                                                       |
-| $\text{Period}$    | number of timer counts (ticks). e.g. if $\text{Period}=99$, there will be 100 ticks (timer at 0 for one tick, timer at 1 for one tick, ... , timer at 99 for one tick, repeat from 0) |
+| $\text{Period}$    | number of timer counts (ticks) per cycle. e.g. if $\text{Period}=99$, there will be 100 ticks (timer at 0 for one tick, timer at 1 for one tick, ... , timer at 99 for one tick, repeat from 0) |
 
 ### Duty Cycle
 

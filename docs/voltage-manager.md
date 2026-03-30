@@ -53,7 +53,14 @@ typedef struct {
 } UARTMsg_t;
 ```
 
-## ADC
+## ADC - Ring Buffer
 
-Implemented a ring buffer that saves the last 8 readings.
+Implemented a ring buffer that saves the last 8 readings. Passes the average value to the alarm task to make it more consistent
 
+## PWM - LED
+
+**Frequency:** 1 kHz (prevent visible flickering)
+
+**Counter Period (Auto Reload Register):** 99 (counter goes from 0 to 99, which is 100 steps. easier to calculate duty cycle)
+
+**Prescaler:** 839 (solve by using above values in formula)
