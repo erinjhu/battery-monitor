@@ -113,6 +113,7 @@ int main(void)
       HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
       __HAL_RCC_CLEAR_RESET_FLAGS();
   }
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Init scheduler */

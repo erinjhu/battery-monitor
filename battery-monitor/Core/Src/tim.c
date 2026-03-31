@@ -21,7 +21,9 @@
 #include "tim.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "app_tasks.h"
+#include "globals.h"
+#include "messages.h"
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim3;
@@ -141,5 +143,45 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 }
 
 /* USER CODE BEGIN 1 */
+osThreadId_t xTaskPWMController;
+uint32_t xTaskPWMControllerBuffer[ 128 ];
+StaticTask_t xTaskPWMControllerControlBlock;
+const osThreadAttr_t xTaskPWMController_attributes = {
+  .name = "xTaskPWMController",
+  .cb_mem = &xTaskPWMControllerControlBlock,
+  .cb_size = sizeof(xTaskPWMControllerControlBlock),
+  .stack_mem = &xTaskPWMControllerBuffer[0],
+  .stack_size = sizeof(xTaskPWMControllerBuffer),
+  .priority = (osPriority_t) osPriorityNormal,
+};
+
+void vTaskPWMController(void *argument)
+{
+  // HAL_UART_Transmit(&huart2, (uint8_t*)"Sensor Task Started\r\n", 21, 100);
+  LOG_FROM_TASK(ERR_CODE_SUCCESS, MSG_TYPE_HEALTH, "PWM Controller Task Started");
+  HAL_StatusTypeDef halErrCode;
+  osStatus_t cmsisErrCode;
+  uint32_t targetDutyCycle = 0;
+  uint32_t currentDutyCycle = 0;
+  uint32_t receivedValue;
+  for(;;)
+  {
+    if(xTaskNotifyWait(0, 0, &receivedValue, pdMS_TO_TICKS(10)) == pdPASS) {
+        targetDutyCycle = receivedValue;
+    }
+
+    // Take ONE step toward the target
+    if (currentDutyCycle < targetDutyCycle) {
+        currentDutyCycle++; 
+    } 
+    else if (currentDutyCycle > targetDutyCycle) {
+        currentDutyCycle--; 
+    }
+
+    // Update the hardware
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, currentDutyCycle);
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
+}
 
 /* USER CODE END 1 */

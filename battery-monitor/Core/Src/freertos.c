@@ -105,6 +105,7 @@ void MX_FREERTOS_Init(void) {
   xTaskEnvMgrHandle = osThreadNew(vTaskEnvMgr, NULL, &xTaskEnvMgr_attributes);
   xTaskVoltageMgrHandle = osThreadNew(vTaskVoltageMgr, NULL, &xTaskVoltageMgr_attributes);
   xTaskWatchdogHandle = osThreadNew(vTaskWatchdog, NULL, &xTaskWatchdog_attributes);
+  xTaskPWMController = osThreadNew(vTaskPWMController, NULL, &xTaskPWMController_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

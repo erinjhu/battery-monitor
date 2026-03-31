@@ -13,7 +13,7 @@
 
 
 
-#define MAX_VOLTAGE 3300
+#define MAX_VOLTAGE 3.3
 #define PERIOD 99
 
 
@@ -107,14 +107,15 @@ void vTaskAlarm(void *argument)
     RETURN_IF_ERROR_CODE_CMSIS(osMutexAcquire(xMutexHandle,100), &healthFlags.alarm);
     float batteryVoltage = fBatteryVoltage;
     RETURN_IF_ERROR_CODE_CMSIS(osMutexRelease(xMutexHandle), &healthFlags.alarm);
-    int compareValue = (int)(batteryVoltage / (float)MAX_VOLTAGE) * PERIOD;
-   
+    int compareValue = (int)((batteryVoltage / (float)MAX_VOLTAGE) * PERIOD);
+    
     if (batteryVoltage > fThresholdVoltage)
     {
       LOG_FROM_TASK(ERR_CODE_SUCCESS, MSG_TYPE_HEALTH, "Green LED ON");
       // RETURN_IF_ERROR_CODE_HAL(HAL_UART_Transmit(&huart2, (uint8_t*)"Turn on green LED\r\n", 30, 100), &healthFlags.alarm);
-      HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_SET);
-      HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_RESET);
+      // HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_SET);
+      // HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_RESET);
+      xTaskNotify(xTaskPWMController, (uint32_t)compareValue, eSetValueWithOverwrite);
       
     } 
     else
@@ -123,9 +124,9 @@ void vTaskAlarm(void *argument)
       // HAL_GPIO_WritePin(GPIOA, GPIO_RED_LED, GPIO_PIN_SET);
       // HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET);
       // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_SET);
-      HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET);
-      HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_1);
-      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 105);
+      // HAL_GPIO_WritePin(GPIOA, GPIO_GREEN_LED, GPIO_PIN_RESET);
+      // HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_1);
+      xTaskNotify(xTaskPWMController, (uint32_t)compareValue, eSetValueWithOverwrite);
     }
     healthFlags.alarm = HEALTH_OK;
   }
