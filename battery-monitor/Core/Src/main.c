@@ -19,24 +19,23 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "adc.h"
+#include "i2c.h"
+#include "iwdg.h"
+#include "tim.h"
+#include "usart.h"
+#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app_tasks.h"
-#include "bsp.h"
 #include "globals.h"
 #include "gpio.h"
 #include "interrupts.h"
 #include "messages.h"
-#include "env_mgr.h"
-#include "voltage_mgr.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
-typedef StaticTask_t osStaticThreadDef_t;
-typedef StaticQueue_t osStaticMessageQDef_t;
-typedef StaticSemaphore_t osStaticMutexDef_t;
-typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -57,82 +56,14 @@ typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 
 /* Private variables ---------------------------------------------------------*/
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for xTaskSensor */
-osThreadId_t xTaskSensorHandle;
-uint32_t xTaskSensorBuffer[ 128 ];
-osStaticThreadDef_t xTaskSensorControlBlock;
-const osThreadAttr_t xTaskSensor_attributes = {
-  .name = "xTaskSensor",
-  .cb_mem = &xTaskSensorControlBlock,
-  .cb_size = sizeof(xTaskSensorControlBlock),
-  .stack_mem = &xTaskSensorBuffer[0],
-  .stack_size = sizeof(xTaskSensorBuffer),
-  .priority = (osPriority_t) osPriorityLow,
-};
-/* Definitions for xTaskAlarm */
-osThreadId_t xTaskAlarmHandle;
-uint32_t xTaskAlarmBuffer[ 128 ];
-osStaticThreadDef_t xTaskAlarmControlBlock;
-const osThreadAttr_t xTaskAlarm_attributes = {
-  .name = "xTaskAlarm",
-  .cb_mem = &xTaskAlarmControlBlock,
-  .cb_size = sizeof(xTaskAlarmControlBlock),
-  .stack_mem = &xTaskAlarmBuffer[0],
-  .stack_size = sizeof(xTaskAlarmBuffer),
-  .priority = (osPriority_t) osPriorityHigh,
-};
-/* Definitions for xTaskUART */
-osThreadId_t xTaskUARTHandle;
-uint32_t xTaskUARTBuffer[ 128 ];
-osStaticThreadDef_t xTaskUARTControlBlock;
-const osThreadAttr_t xTaskUART_attributes = {
-  .name = "xTaskUART",
-  .cb_mem = &xTaskUARTControlBlock,
-  .cb_size = sizeof(xTaskUARTControlBlock),
-  .stack_mem = &xTaskUARTBuffer[0],
-  .stack_size = sizeof(xTaskUARTBuffer),
-  .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for xUARTQueue */
-uint8_t xUARTQueueBuffer[ 16 * sizeof( UARTMsg_t ) ];
-osStaticMessageQDef_t xUARTQueueControlBlock;
-const osMessageQueueAttr_t xUARTQueue_attributes = {
-  .name = "xUARTQueue",
-  .cb_mem = &xUARTQueueControlBlock,
-  .cb_size = sizeof(xUARTQueueControlBlock),
-  .mq_mem = &xUARTQueueBuffer,
-  .mq_size = sizeof(xUARTQueueBuffer)
-};
-/* Definitions for xMutex */
-osStaticMutexDef_t xMutexControlBlock;
-const osMutexAttr_t xMutex_attributes = {
-  .name = "xMutex",
-  .cb_mem = &xMutexControlBlock,
-  .cb_size = sizeof(xMutexControlBlock),
-};
-/* Definitions for xBinSem */
-osStaticSemaphoreDef_t xBinSemControlBlock;
-const osSemaphoreAttr_t xBinSem_attributes = {
-  .name = "xBinSem",
-  .cb_mem = &xBinSemControlBlock,
-  .cb_size = sizeof(xBinSemControlBlock),
-};
 /* USER CODE BEGIN PV */
 
-
+      // funciton prototypes are put in separate files
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void); 
-
-
+void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -159,7 +90,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -174,60 +105,20 @@ int main(void)
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
+  MX_IWDG_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  BMP180_Init();
+  if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST) != RESET) {
+      char *msg = "\r\n[CRITICAL] WATCHDOG RESET DETECTED!\r\n";
+      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
+      __HAL_RCC_CLEAR_RESET_FLAGS();
+  }
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize();
-  /* Create the mutex(es) */
-  /* creation of xMutex */
-  xMutexHandle = osMutexNew(&xMutex_attributes);
-
-  /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
-
-  /* Create the semaphores(s) */
-  /* creation of xBinSem */
-  xBinSemHandle = osSemaphoreNew(1, 0, &xBinSem_attributes);
-
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
-
-  /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
-
-  /* Create the queue(s) */
-  /* creation of xUARTQueue */
-  xUARTQueueHandle = osMessageQueueNew (16, sizeof(UARTMsg_t), &xUARTQueue_attributes);
-
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
-
-  /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-
-  /* creation of xTaskSensor */
-  xTaskSensorHandle = osThreadNew(vTaskVoltageMgr, NULL, &xTaskSensor_attributes);
-
-  /* creation of xTaskAlarm */
-  xTaskAlarmHandle = osThreadNew(vTaskAlarm, NULL, &xTaskAlarm_attributes);
-
-  /* creation of xTaskUART */
-  xTaskUARTHandle = osThreadNew(vTaskUART, NULL, &xTaskUART_attributes);
-
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
-
-  /* USER CODE BEGIN RTOS_EVENTS */
-  /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
+  osKernelInitialize();  /* Call init function for freertos objects (in cmsis_os2.c) */
+  MX_FREERTOS_Init();
 
   /* Start scheduler */
   osKernelStart();
@@ -275,9 +166,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 16;
@@ -304,23 +196,10 @@ void SystemClock_Config(void)
   }
 }
 
-
-
-
-
-
-
-
-
 /* USER CODE BEGIN 4 */
 
+
 /* USER CODE END 4 */
-
-
-
-
-
-
 
 /**
   * @brief  Period elapsed callback in non blocking mode

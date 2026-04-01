@@ -1,11 +1,15 @@
 #ifndef MESSAGES_H
 #define MESSAGES_H
 
+#include <stdint.h>
 
 typedef enum
 {
   MSG_TYPE_VOLTAGE,
+  MSG_TYPE_TEMP,
+  MSG_TYPE_PRESSURE,
   MSG_TYPE_BUTTON,
+  MSG_TYPE_HEALTH,
   MSG_TYPE_ERROR
 } MsgType_t;
 
@@ -33,9 +37,10 @@ typedef enum
   ERR_CODE_FAILED_STACK_CANARY = 19,
   ERR_CODE_ADC_TIMEOUT = 20,
   ERR_CODE_I2C_MEM_READ = 21,
-  ERR_CODE_I2C_MEM_WRITE = 22;
-  ERR_CODE_FAILED_BMP180_INIT = 23;
-  ERR_CODE_FAILED_BMP180_CALIB = 24;
+  ERR_CODE_I2C_MEM_WRITE = 22,
+  ERR_CODE_FAILED_BMP180_INIT = 23,
+  ERR_CODE_FAILED_BMP180_CALIB = 24,
+  ERR_CODE_WATCHDOG_HEALTHY = 25,
 } ErrorCode_t;
 
 typedef struct 
@@ -49,16 +54,39 @@ typedef struct
   const char *file;
   const char *func;
   int line;
+  char msg[64];
 } UARTMsg_t;
 
-#define REPORT_ERROR(errCode) report_error((errCode), __FILE__, __func__, __LINE__)
-#define RETURN_IF_ERROR_CODE(_ret)         \
- do {                                      \
-    errCode = _ret;                        \
-    if (errCode != HAL_OK) { \
-      REPORT_ERROR(errCode);               \
-      return errCode;                      \
-    }                                      \
+void logMsgFromTask(ErrorCode_t errCode, MsgType_t type, const char *file, const char *func, int line, const char *message);
+
+#define LOG_FROM_TASK(_errCode, _type, _message) logMsgFromTask((_errCode), (_type), __FILE__, __func__, __LINE__, (_message))
+
+void report_error(ErrorCode_t errCode, const char *file, const char *func, int line);
+
+#define REPORT_ERROR(errCode, _healthFlag) report_error((errCode), __FILE__, __func__, __LINE__)
+
+
+#define RETURN_IF_ERROR_CODE_CMSIS(_ret, _healthFlag) \
+  do { \
+    cmsisErrCode = _ret; \
+    if (cmsisErrCode != osOK) { \
+      *_healthFlag = HEALTH_ERROR; /* or your error code */ \
+      REPORT_ERROR(cmsisErrCode, _healthFlag); \
+      return; \
+    } \
   } while (0)
 
+#define RETURN_IF_ERROR_CODE_HAL(_ret, _healthFlag) \
+  do { \
+    halErrCode = _ret; \
+    if (halErrCode != HAL_OK) { \
+      *_healthFlag = HEALTH_ERROR; /* or your error code */ \
+      REPORT_ERROR(halErrCode, _heathFlag); \
+      return; \
+    } \
+  } while (0)
+
+
+
+  
 #endif // MESSAGES_H
