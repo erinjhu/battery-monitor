@@ -2,6 +2,9 @@
 
 pain.
 
+## Mar 31, 2026
+- Configured PWM to change brightness proportional to voltage. LED was flickering
+
 ## Mar 26, 2026
 - Accidental git restore .
 - Couldn't figure out why updated outputs weren't printing. Had to clean the project

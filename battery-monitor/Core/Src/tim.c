@@ -166,21 +166,24 @@ void vTaskPWMController(void *argument)
   uint32_t receivedValue;
   for(;;)
   {
-    if(xTaskNotifyWait(0, 0, &receivedValue, pdMS_TO_TICKS(10)) == pdPASS) {
+    // first two arguments are the event flag for the task notif
+    // 
+    if(xTaskNotifyWait(0, 0xFFFFFFFF, &receivedValue, pdMS_TO_TICKS(10)) == pdPASS) {
         targetDutyCycle = receivedValue;
+        currentDutyCycle = targetDutyCycle;
     }
 
     // Take ONE step toward the target
-    if (currentDutyCycle < targetDutyCycle) {
-        currentDutyCycle++; 
-    } 
-    else if (currentDutyCycle > targetDutyCycle) {
-        currentDutyCycle--; 
-    }
+    // if (currentDutyCycle < targetDutyCycle) {
+    //     currentDutyCycle++; 
+    // } 
+    // else if (currentDutyCycle > targetDutyCycle) {
+    //     currentDutyCycle--; 
+    // }
 
     // Update the hardware
     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, currentDutyCycle);
-    vTaskDelay(pdMS_TO_TICKS(10));
+    vTaskDelay(pdMS_TO_TICKS(50));
   }
 }
 

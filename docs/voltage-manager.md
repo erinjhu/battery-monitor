@@ -64,3 +64,32 @@ Implemented a ring buffer that saves the last 8 readings. Passes the average val
 **Counter Period (Auto Reload Register):** 99 (counter goes from 0 to 99, which is 100 steps. easier to calculate duty cycle)
 
 **Prescaler:** 839 (solve by using above values in formula)
+
+## Task Notification
+
+- Clear the value after reading it
+
+**Checking a task notification**
+
+```c
+BaseType_t xTaskNotifyWait(
+    uint32_t ulBitsToClearOnEntry, 
+    uint32_t ulBitsToClearOnExit, 
+    uint32_t *pulNotificationValue,
+    TickType_t xTicksToWait
+);
+```
+
+1. Enter the function `xTaskNotifyWait`
+2. Clear the bits in the mask `ulBitsToClearOnEntry`
+3. Check the value of the notification
+    - Each task has a 32-bit value
+      - Value was sent from another task and received by the task that calls `xTaskNotifyWait`
+    - If there is a notification present (check the flag that indicates if there is a notif)
+      - Read the result and store it in the `pulNotificationValue` 
+      - Clear bits in `ulBitsToClearOnExit`
+      - Return `pdTRUE` 
+    - If there is no notification present
+      - Wait for `xTicksToWait` until a notification arrives
+      - When it arrives, go to step 3
+      - If it doesn't arrive, return `pdFALSE`

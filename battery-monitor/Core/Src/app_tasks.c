@@ -14,7 +14,7 @@
 
 
 #define MAX_VOLTAGE 3.3
-#define PERIOD 99
+#define PERIOD 209
 
 
 osThreadId_t xTaskUARTHandle;
@@ -157,11 +157,11 @@ void vTaskWatchdog(void *argument)
   for(;;)
   {
     // logAllHealthFlags();
-    if (healthFlags.uart == HEALTH_OK && healthFlags.alarm == HEALTH_OK && healthFlags.bmp180 == HEALTH_OK && healthFlags.button == HEALTH_OK && healthFlags.env_mgr == HEALTH_OK && healthFlags.voltage_mgr == HEALTH_OK)
-    {
+    // if (healthFlags.uart == HEALTH_OK && healthFlags.alarm == HEALTH_OK && healthFlags.bmp180 == HEALTH_OK && healthFlags.button == HEALTH_OK && healthFlags.env_mgr == HEALTH_OK && healthFlags.voltage_mgr == HEALTH_OK)
+    // {
       LOG_FROM_TASK(ERR_CODE_WATCHDOG_HEALTHY, MSG_TYPE_HEALTH, "watchdog healthy");
       RETURN_IF_ERROR_CODE_HAL(HAL_IWDG_Refresh(&hiwdg), &healthFlags.watchdog);
-    }
+    // }
     osDelay(50);
   }
 }

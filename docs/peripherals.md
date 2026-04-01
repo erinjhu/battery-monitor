@@ -6,10 +6,18 @@
 - **Trigger source:** software
 
 ## UART
+
+Configuration
 - **Baud rate:** 115200 bits/s
 - **Word length:** 8 bits
 - **Parity:** no parity 
 - **Stop bits:** 1
+
+Notes
+
+`osMessageQueuePut(..., ..., ..., 10)`
+
+
 
 ## GPIO
 
